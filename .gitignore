@@ -1,5 +1,5 @@
 .idea
-!database.php
+database.php
 composer.lock
 *.log
 thinkphp
