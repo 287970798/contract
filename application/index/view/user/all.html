@@ -48,6 +48,59 @@ layui.use(['form', 'table'], function () {
         var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
         var tr = obj.tr; //获得当前行 tr 的DOM对象
         console.log(data);
+        // 删除
+        if (layEvent === 'del') {
+            layer.confirm('确定要删除吗', {icon: 3, title:'提示'}, function(index){
+                var delLoadingIndex = layer.load(1);
+                $.ajax({
+                    type: 'DELETE',
+                    url: '/user/del/' + data.id,
+                    success: function (result) {
+                        layer.close(delLoadingIndex);
+                        if (result === 1) {
+                            obj.del();
+                            layer.msg('操作成功');
+                            console.log(result);
+                        } else {
+                            layer.msg('操作失败');
+                            console.log(result);
+                        }
+                    },
+                    error: function (error) {
+                        layer.close(delLoadingIndex);
+                        layer.msg('操作失败');
+                        console.log(error)
+                    }
+                });
+
+                layer.close(index);
+            });
+        }
+        // 编辑
+        if (layEvent === 'edit') {
+            location.href = '/user/edit/' + data.id;
+        }
+        // 查看详情
+        if (layEvent === 'detail') {
+            layer.open({
+                type: 1,
+                area: ['500px'],
+                btn: '确定',
+                btnAlign: 'c',
+                title: '用户详情',
+                content: '<div style="padding: 10px;">' +
+                '<table class="layui-table">' +
+                '<tr><th style="font-weight: bold;" width="80">ID</th><td>'+data.id+'</td></tr>' +
+                '<tr><th style="font-weight: bold;">用户名</th><td>'+data.username+'</td></tr>' +
+                '<tr><th style="font-weight: bold;">姓名</th><td>'+data.name+'</td></tr>' +
+                '<tr><th style="font-weight: bold;">手机号</th><td>'+data.phone+'</td></tr>' +
+                '<tr><th style="font-weight: bold;">部门</th><td>'+data.department+'</td></tr>' +
+                '<tr><th style="font-weight: bold;">创建时间</th><td>'+data.create_time+'</td></tr>' +
+                '</table>' +
+                '</div>' //这里content是一个普通的String
+            });
+        }
+        // 状态更改
         if (layEvent === 'status'){
             var statusLoadIndex = layer.load(1);
             var switchE = $(tr).find('input:eq(0)');

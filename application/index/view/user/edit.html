@@ -1,0 +1,107 @@
+{extend name="common/base"}
+{block name="content"}
+<div class="layui-container">
+    <form class="layui-form layui-form-pane" action="">
+        <div class="layui-form-item">
+            <label class="layui-form-label">用户名</label>
+            <div class="layui-input-block">
+                <input value="{$user.username}" type="text" name="username" required lay-verify="required" placeholder="用户名" autocomplete="off"
+                       class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">密码</label>
+            <div class="layui-input-inline">
+                <input type="password" name="password" placeholder="不修改请留空"
+                       autocomplete="off" class="layui-input">
+            </div>
+            <div class="layui-form-mid layui-word-aux">密码不少于6位</div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">姓名</label>
+            <div class="layui-input-block">
+                <input value="{$user.name}" type="text" name="name" required lay-verify="required" placeholder="姓名" autocomplete="off"
+                       class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">部门</label>
+            <div class="layui-input-block">
+                <input value="{$user.department}" type="text" name="department" required lay-verify="required" placeholder="部门" autocomplete="off"
+                       class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">手机</label>
+            <div class="layui-input-block">
+                <input value="{$user.phone}" type="text" name="phone" required lay-verify="required" placeholder="手机" autocomplete="off"
+                       class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">状态</label>
+            <div class="layui-input-block">
+                {if $user.status==1}
+                <input type="checkbox" name="status" value="1" lay-skin="switch" checked lay-text="启用|锁定" lay-filter="status">
+                {else /}
+                <input type="checkbox" name="status" value="2" lay-skin="switch" lay-text="启用|锁定" lay-filter="status">
+                {/if}
+            </div>
+        </div>
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">备注</label>
+            <div class="layui-input-block">
+                <textarea name="note" placeholder="请输入内容" class="layui-textarea">{$user.note}</textarea>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn" lay-submit lay-filter="formDemo">立即提交</button>
+                <button type="reset" class="layui-btn layui-btn-primary" onclick="location.href='/user/all'">返回</button>
+            </div>
+        </div>
+    </form>
+</div>
+{/block}
+
+{block name="js"}
+{__block__}
+<script>
+    layui.use(['form'], function () {
+        var $ = layui.jquery;
+        var form = layui.form;
+        //监听提交
+        form.on('submit(formDemo)', function(data){
+            var index1 = layer.load(1);
+            data.field.status = $('input[name="status"]').val();
+            console.log(data.field)
+            $.post({
+                type: 'POST',
+                url: '/user/edit/{$user.id}',
+                data: data.field,
+                success: function (result) {
+                    console.log(result);
+                    layer.close(index1);
+                    layer.msg('修改成功');
+                },
+                error: function (error) {
+                    layer.close(index1);
+                    console.log(error);
+                    layer.msg('修改失败');
+                }
+            });
+            return false;
+        });
+        // 监听开关
+        form.on('switch(status)', function(data){
+            if (data.elem.checked) {
+                $(data.elem).val(1);
+            } else {
+                $(data.elem).val(2);
+            }
+            console.log($(data.elem).val());
+        });
+    });
+
+</script>
+{/block}

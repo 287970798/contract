@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="cn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>{$title}</title>
+    {include file="common/css"}
+    <style>
+        body{
+            background: url("http://img.pconline.com.cn/images/upload/upc/tx/photoblog/1409/12/c2/38513441_1410508402132.jpg") center 20%;
+        }
+        .login {
+            position: relative;
+            left: 0;
+            top: 0;
+            padding: 210px 0;
+            min-height: 100%;
+            -webkit-box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            box-sizing: border-box;
+        }
+
+        .login-main {
+            width: 375px;
+            margin: 0 auto;
+            box-sizing: border-box;
+            border: 0px solid #2F4056;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.5) ;
+        }
+
+        .login-header {
+            text-align: center;
+            padding: 20px;
+        }
+        .login-header h1{
+            margin-bottom: 10px;
+            font-weight: 300;
+            font-size: 30px;
+            color: #fff;
+        }
+        .login-header p{
+            font-weight: 300;
+            color: #999;
+        }
+        .login-body{
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="layui-container login">
+    <div class="login-main">
+        <div class="login-header">
+            <h1>合同管理系统</h1>
+            <p>山东联创优学教育科技有限公司</p>
+        </div>
+        <div class="login-body layui-form layui-form-pane">
+            <div class="layui-form-item">
+                <label class="layui-form-label">帐号</label>
+                <div class="layui-input-block">
+                    <input type="text" name="username" required  lay-verify="required" placeholder="请输入用户名" autocomplete="off" class="layui-input" style="width: 225px;">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">密码</label>
+                <div class="layui-input-inline">
+                    <input type="password" name="password" required lay-verify="required" placeholder="请输入密码" autocomplete="off" class="layui-input" style="width: 225px;">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                    <button class="layui-btn layui-btn-fluid" lay-submit lay-filter="formDemo" style="margin: 20px 0;">登录</button>
+            </div>
+        </div>
+    </div>
+</div>
+{include file="common/js"}
+<script>
+    layui.use('form', function () {
+        var form = layui.form;
+        form.on('submit(formDemo)', function (data) {
+            var index1 = layer.load(1);
+            var $ = layui.jquery;
+            $.post({
+                type: 'POST',
+                url: '/login',
+                data: data.field,
+                success: function (result) {
+                    console.log(result);
+                    layer.close(index1);
+                    if (result === 1) {
+                        // 将用户信息放入session
+
+                        // 提示
+                        layer.msg('登录成功');
+
+                        // 跳转到控制台
+
+                    } else {
+                        layer.msg('登录失败');
+                    }
+                },
+                error: function (error) {
+                    layer.close(index1);
+                    console.log(error);
+                    layer.msg('登录失败');
+                }
+            });
+            return false;
+        })
+    });
+</script>
+</body>
+</html>
