@@ -8,6 +8,9 @@ use app\index\model\Customer;
 
 class Linkman extends BaseController
 {
+    protected $beforeActionList = [
+        'checkAuth' => ['only' => 'del']
+    ];
     // add
     public function add()
     {
@@ -67,7 +70,7 @@ class Linkman extends BaseController
     // list
     public function all()
     {
-        $linkmans = LinkmanModel::all();
+        $linkmans = LinkmanModel::with('customer')->select();
         $linkmans = json_encode($linkmans);
         $this->assign([
             'title' => '联系人管理',

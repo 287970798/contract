@@ -7,6 +7,7 @@ use app\index\model\Customer as CustomerModel;
 
 class Customer extends BaseController
 {
+    protected $beforeActionList = [];
     // add
     public function add()
     {
