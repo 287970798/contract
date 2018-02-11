@@ -9,7 +9,7 @@
     {include file="common/css"}
     <style>
         body{
-            background: url("http://img.pconline.com.cn/images/upload/upc/tx/photoblog/1409/12/c2/38513441_1410508402132.jpg") center 20%;
+            background: url("__STATIC__/images/bg@login.jpg") center 20%;
         }
         .login {
             position: relative;
@@ -48,6 +48,12 @@
         .login-body{
             padding: 20px;
         }
+        .login-footer{
+            color: #999;
+            text-align: center;
+            font-size: 14px;
+            padding-bottom: 20px;
+        }
     </style>
 </head>
 <body>
@@ -71,8 +77,11 @@
                 </div>
             </div>
             <div class="layui-form-item">
-                    <button class="layui-btn layui-btn-fluid" lay-submit lay-filter="formDemo" style="margin: 20px 0;">登录</button>
+                    <button class="layui-btn layui-btn-fluid" lay-submit lay-filter="formDemo" style="margin: 20px 0 0;">登录</button>
             </div>
+        </div>
+        <div class="login-footer">
+            &copy; UNITEEDU.CN
         </div>
     </div>
 </div>
@@ -94,10 +103,10 @@
                         // 将用户信息放入session
 
                         // 提示
-                        layer.msg('登录成功');
-
-                        // 跳转到控制台
-
+                        layer.msg('登录成功',{anim: 0}, function () {
+                            // 跳转到控制台
+                            location.href="/";
+                        });
                     } else {
                         layer.msg('登录失败');
                     }

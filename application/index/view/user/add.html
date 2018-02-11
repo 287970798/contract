@@ -18,6 +18,15 @@
             <div class="layui-form-mid layui-word-aux">密码不少于6位</div>
         </div>
         <div class="layui-form-item">
+            <label class="layui-form-label">用户类型</label>
+            <div class="layui-input-block">
+                <select name="level" lay-verify="required">
+                    <option value="2">普通用户</option>
+                    <option value="1">超级管理员</option>
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
             <label class="layui-form-label">姓名</label>
             <div class="layui-input-block">
                 <input type="text" name="name" required lay-verify="required" placeholder="姓名" autocomplete="off"
@@ -34,7 +43,7 @@
         <div class="layui-form-item">
             <label class="layui-form-label">手机</label>
             <div class="layui-input-block">
-                <input type="text" name="phone" required lay-verify="required" placeholder="手机" autocomplete="off"
+                <input type="text" name="phone" required lay-verify="phone" placeholder="手机" autocomplete="off"
                        class="layui-input">
             </div>
         </div>
@@ -78,9 +87,17 @@
                 success: function (result) {
                     console.log(result);
                     layer.close(index1);
+                    if (result === 1) {
+                        layer.msg('用户添加成功', function () {
+                            location.href='/user/all';
+                        });
+                    } else if (result === -1) {
+                        layer.open({content:'添加失败！用户名已存在！', icon:2});
+                    }
                 },
                 error: function (error) {
                     layer.close(index1);
+                    layer.msg('内部错误，添加失败', {icon: 2});
                     console.log(error);
                 }
             });

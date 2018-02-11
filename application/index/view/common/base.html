@@ -11,27 +11,27 @@
     </title>
     {// 引入的css文件}
     {block name="include-css"}
-        {include file="common/css"}
+    {include file="common/css"}
     {/block}
 
     {//自定义css}
     {block name="css"}
-        <style>
-            .layui-icon {
-                font-size: 16px;
-            }
-        </style>
+    <style>
+        .layui-icon {
+            font-size: 16px;
+        }
+    </style>
     {/block}
 </head>
 <body class="layui-layout-body">
 <div class="layui-layout layui-layout-admin">
-{//头部}
-{block name="header"}
+    {//头部}
+    {block name="header"}
     <div class="layui-header">
         <div class="layui-logo">The First One</div>
         <!-- 头部区域（可配合layui已有的水平导航） -->
         <ul class="layui-nav layui-layout-left">
-            <li class="layui-nav-item"><a href="">控制台</a></li>
+            <li class="layui-nav-item"><a href="/">控制台</a></li>
             <li class="layui-nav-item">
                 <a href="javascript:;">用户</a>
                 <dl class="layui-nav-child">
@@ -50,19 +50,25 @@
         </ul>
         <ul class="layui-nav layui-layout-right">
             <li class="layui-nav-item">
-                <a href="javascript:;"><img src="http://t.cn/RCzsdCq" class="layui-nav-img">管理员</a>
+                <a href="javascript:;">
+                    <span class="layui-bg-blue layui-nav-img"
+                          style="width: 30px;height: 30px; text-align:center;line-height:30px;display:inline-block;border-radius: 50%;vertical-align: middle;">
+                        {:mb_substr($Think.session.admin.name, 0, 1, 'UTF-8')}
+                    </span>
+                    <img src="http://t.cn/RCzsdCq" class="layui-nav-img layui-hide">{$Think.session.admin.name}
+                </a>
                 <dl class="layui-nav-child">
                     <dd><a href="">基本资料</a></dd>
                     <dd><a href="">安全设置</a></dd>
                 </dl>
             </li>
-            <li class="layui-nav-item"><a href="">退了</a></li>
+            <li class="layui-nav-item"><a href="/logout">退出</a></li>
         </ul>
     </div>
-{/block}
+    {/block}
 
-{//左栏}
-{block name="left"}
+    {//左栏}
+    {block name="left"}
     <div class="layui-side layui-bg-black">
         <div class="layui-side-scroll">
             <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
@@ -94,10 +100,10 @@
                 <li class="layui-nav-item">
                     <a href="javascript:;"><i class="layui-icon">&#xe613;</i> 客户管理</a>
                     <dl class="layui-nav-child">
-                        <dd><a href="javascript:;">客户列表</a></dd>
-                        <dd><a href="javascript:;">联系人列表</a></dd>
-                        <dd><a href="javascript:;">新增客户</a></dd>
-                        <dd><a href="javascript:;">新增联系人</a></dd>
+                        <dd><a href="/customer/all">客户列表</a></dd>
+                        <dd><a href="/linkman/all">联系人列表</a></dd>
+                        <dd><a href="/customer/add">新增客户</a></dd>
+                        <dd><a href="/linkman/add">新增联系人</a></dd>
                     </dl>
                 </li>
                 <li class="layui-nav-item">
@@ -112,35 +118,35 @@
             </ul>
         </div>
     </div>
-{/block}
+    {/block}
 
-{//主体内容}
-<div class="layui-body">
-    <div class="layui-tab" lay-filter="bodyTab">
-        <ul class="layui-tab-title">
-            <li class="layui-this">{$title}</li>
-        </ul>
-        <div class="layui-tab-content" style="height: 100px;">
-            <div class="layui-tab-item layui-show">
-                <div style="padding: 10px;">
-                    {block name="content"}
-                    <!-- 内容主体区域 -->
-                    内容主体区域
-                    {/block}
+    {//主体内容}
+    <div class="layui-body">
+        <div class="layui-tab" lay-filter="bodyTab">
+            <ul class="layui-tab-title">
+                <li class="layui-this">{$title}</li>
+            </ul>
+            <div class="layui-tab-content" style="height: 100px;">
+                <div class="layui-tab-item layui-show">
+                    <div style="padding: 10px;">
+                        {block name="content"}
+                        <!-- 内容主体区域 -->
+                        内容主体区域
+                        {/block}
+                    </div>
                 </div>
             </div>
         </div>
+
     </div>
 
-</div>
-
-{//底部}
-<div class="layui-footer">
-    {block name="footer"}
-    <!-- 底部固定区域 -->
-    © uniteedu.cn - 联创优学 - 禾瑞技术支持 kf@kvstone.net
-    {/block}
-</div>
+    {//底部}
+    <div class="layui-footer">
+        {block name="footer"}
+        <!-- 底部固定区域 -->
+        © uniteedu.cn - 联创优学 - 禾瑞技术支持 kf@kvstone.net
+        {/block}
+    </div>
 </div>
 {// 包含的js文件}
 {block name="include-js"}
@@ -151,7 +157,7 @@
 {block name="js"}
 <script>
     //JavaScript代码区域
-    layui.use('element', function() {
+    layui.use('element', function () {
         var element = layui.element;
     });
 </script>

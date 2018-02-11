@@ -5,9 +5,13 @@ namespace app\index\controller;
 
 use app\index\model\User as UserModel;
 use think\Exception;
+use think\Session;
 
 class User extends BaseController
 {
+    protected $beforeActionList = [
+        'checkAuth' => ['only' => 'add,all,del']
+    ];
     // add
     public function add()
     {
@@ -15,6 +19,11 @@ class User extends BaseController
             $post = $this->request->post();
             $post['password'] = sha1($post['password']);
             $user = new UserModel();
+            // 检测用户是否已存在
+            $one = $user->where('username', 'eq', $post['username'])->find();
+            if ($one) {
+                return -1; // 用户存在
+            }
             $result = $user->allowField(true)->save($post);
             return $result;
         }
@@ -82,6 +91,8 @@ class User extends BaseController
             $password = sha1($post['password']);
             $user = UserModel::where('username', 'eq', $username)->where('password', 'eq', $password)->find();
             if ($user) {
+                // 记录session
+                Session::set('admin', $user);
                 return 1;
             } else {
                 return 2;
@@ -93,4 +104,9 @@ class User extends BaseController
         return $this->fetch();
     }
     // logout
+    public function logout()
+    {
+        Session::delete('admin');
+        $this->redirect('/login', 302);
+    }
 }

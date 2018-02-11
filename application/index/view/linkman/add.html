@@ -1,0 +1,82 @@
+{extend name="common/base"}
+{block name="content"}
+<div class="layui-container">
+    <form class="layui-form layui-form-pane" action="">
+        <div class="layui-form-item">
+            <label class="layui-form-label">联系人姓名</label>
+            <div class="layui-input-block">
+                <input type="text" name="name" required lay-verify="required" placeholder="请填写联系人姓名" autocomplete="off"
+                       class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">所属客户</label>
+            <div class="layui-input-block">
+                <select name="customer_id" required lay-verify="required" lay-search>
+                    <option value>请输入选择</option>
+                    {volist name="customers" id="customer"}
+                    <option value="{$customer.id}">{$customer.name}</option>
+                    {/volist}
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">手机</label>
+            <div class="layui-input-block">
+                <input type="text" name="phone" required lay-verify="phone" placeholder="手机" autocomplete="off"
+                       class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">备注</label>
+            <div class="layui-input-block">
+                <textarea name="note" placeholder="请输入内容" class="layui-textarea"></textarea>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn" lay-submit lay-filter="formDemo">立即提交</button>
+                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+            </div>
+        </div>
+    </form>
+</div>
+{/block}
+
+{block name="js"}
+{__block__}
+<script>
+    layui.use(['form'], function () {
+        var $ = layui.jquery;
+        var form = layui.form;
+        //监听提交
+        form.on('submit(formDemo)', function(data){
+            var index1 = layer.load(1);
+            console.log(data.field)
+            $.post({
+                type: 'POST',
+                url: '/linkman/add',
+                data: data.field,
+                success: function (result) {
+                    console.log(result);
+                    layer.close(index1);
+                    if (result === 1) {
+                        layer.msg('联系人添加成功', function () {
+                            location.href='/linkman/all';
+                        });
+                    } else if (result === -1) {
+                        layer.open({content:'添加失败！联系人已存在！', icon:2});
+                    }
+                },
+                error: function (error) {
+                    layer.close(index1);
+                    layer.msg('内部错误，添加失败', {icon: 2});
+                    console.log(error);
+                }
+            });
+            return false;
+        });
+    });
+
+</script>
+{/block}
