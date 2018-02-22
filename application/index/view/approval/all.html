@@ -1,0 +1,118 @@
+{extend name="common/base"}
+{block name="content"}
+<table id="approval" lay-filter="approval"></table>
+<script type="text/html" id="operateBar">
+    <a class="layui-btn layui-btn-xs" lay-event="detail">查看</a>
+    <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+
+    <!-- 这里同样支持 laytpl 语法，如： -->
+    {{#  if(d.auth > 2){ }}
+    <a class="layui-btn layui-btn-xs" lay-event="check">审核</a>
+    {{#  } }}
+</script>
+<script type="text/html" id="startBar">
+    {{#  if(d.start == 1){ }}
+    <a lay-event="start"><input type="checkbox" name="start" value="1" checked="checked" lay-skin="switch" lay-text="启用|锁定"  lay-filter="start"></a>
+    {{# }else{ }}
+    <a lay-event="start"><input type="checkbox" name="start" value="2" lay-skin="switch" lay-text="启用|锁定" lay-filter="start"></a>
+    {{# } }}
+</script>
+
+{/block}
+
+{block name="js"}
+{__block__}
+<script>
+layui.use(['form', 'table'], function () {
+    var $ = layui.jquery;
+    var table = layui.table;
+    var form = layui.form;
+    table.render({
+        elem: '#approval'
+        ,height: 'full-220'
+        ,data: {$approvals}
+        ,page: true //开启分页
+        ,cols: [[ //表头
+            {checkbox: true},
+            {field: 'id', title: 'ID',width: 100, sort: true}
+            ,{field: 'name', title: '审批名',sort: true}
+            ,{field: 'contract', title: '关联合同', templet: '<div>{{d.contract.name}}</div>', sort: true}
+            ,{field: 'start', title: '启用', width:150, templet: '<div>{{d.start==1?"启用":"锁定"}}</div>', align:'center'}
+            ,{title: '操作',fixed: 'right', width:150, align:'center', toolbar: '#operateBar'}
+        ]]
+    });
+    table.on('tool(approval)', function(obj) { //注：tool是工具条事件名，test是table原始容器的属性 lay-filter="对应的值"
+        var data = obj.data; //获得当前行数据
+        var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
+        var tr = obj.tr; //获得当前行 tr 的DOM对象
+        console.log(data);
+        // 删除
+        if (layEvent === 'del') {
+            layer.confirm('确定要删除吗', {icon: 3, title:'提示'}, function(index){
+                var delLoadingIndex = layer.load(1);
+                $.ajax({
+                    type: 'DELETE',
+                    url: '/approval/del/' + data.id,
+                    success: function (result) {
+                        layer.close(delLoadingIndex);
+                        if (result === 1) {
+                            obj.del();
+                            layer.msg('操作成功');
+                            console.log(result);
+                        } else {
+                            layer.msg('操作失败');
+                            console.log(result);
+                        }
+                    },
+                    error: function (error) {
+                        layer.close(delLoadingIndex);
+                        layer.msg('操作失败');
+                        console.log(error)
+                    }
+                });
+
+                layer.close(index);
+            });
+        }
+        // 编辑
+        if (layEvent === 'edit') {
+            location.href = '/approval/edit/' + data.id;
+        }
+        // 查看详情
+        if (layEvent === 'detail') {
+            var userStart = data.start === 1 ? '启用' : '锁定';
+            layer.open({
+                type: 1,
+                area: ['500px'],
+                btn: '确定',
+                btnAlign: 'c',
+                title: '审批流详情',
+                content: '<div style="padding: 10px;">' +
+                '<table class="layui-table">' +
+                '<tr><th style="font-weight: bold;" width="80">ID</th><td>'+data.id+'</td></tr>' +
+                '<tr><th style="font-weight: bold;">审批名</th><td>'+data.name+'</td></tr>' +
+                '<tr><th style="font-weight: bold;">关联合同</th><td>'+data.contract.name+'</td></tr>' +
+                '<tr><th style="font-weight: bold;">是否启用</th><td>'+userStart+'</td></tr>' +
+                '<tr><th style="font-weight: bold;">创建时间</th><td>'+data.create_time+'</td></tr>' +
+                '</table>' +
+                '</div>' //这里content是一个普通的String
+            });
+        }
+        // 启用状态更改
+    })
+    // 监听开关
+    // table.on('switch(start)', function(data){
+    //     data.start = 5;
+    //     console.log(data)
+    //     console.log($(data.elem).val())
+    //     if (data.elem.checked) {
+    //         $(data.elem).val(1);
+    //     } else {
+    //         $(data.elem).val(2);
+    //     }
+    //     // console.log($(data.elem).val());
+    // });
+})
+</script>
+{/block}

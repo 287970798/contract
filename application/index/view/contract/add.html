@@ -1,0 +1,312 @@
+{extend name="common/base"}
+{block name="content"}
+<div class="layui-container">
+    <form class="layui-form layui-form-pane" action="">
+        <div class="layui-form-item">
+            <label class="layui-form-label">合同名</label>
+            <div class="layui-input-block">
+                <input type="text" name="name" required lay-verify="required" placeholder="合同名" autocomplete="off"
+                       class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">合同编号</label>
+            <div class="layui-input-block">
+                <input type="text" name="contract_sn" required lay-verify="required" placeholder="不用填写，系统自动生成"
+                       autocomplete="off"
+                       class="layui-input" disabled>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">合同分类</label>
+            <div class="layui-input-block">
+                <select name="category_id" lay-verify="required" lay-filter="category" lay-search>
+                    <option value></option>
+                    {volist name="categories" id="category"}
+                    <option value="{$category.id}">{$category.name}</option>
+                    {/volist}
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">合同类型</label>
+            <div class="layui-input-block">
+                <select name="type_id" lay-verify="required" lay-filter="type" lay-search>
+                    <option value></option>
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">客户</label>
+            <div class="layui-input-block">
+                <select name="customer_id" lay-verify="required" lay-filter="customer" lay-search>
+                    <option value></option>
+                    {volist name="customers" id="customer"}
+                    <option value="{$customer.id}">{$customer.name}</option>
+                    {/volist}
+                </select>
+            </div>
+            <!--<a class="layui-btn">增加</a>-->
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">客户联系人</label>
+            <div class="layui-input-block">
+                <select name="linkman_id" lay-verify="required" lay-filter="linkman" lay-search>
+                    <option value></option>
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">负责人</label>
+            <div class="layui-input-block">
+                <input value="{$user.name}" type="text" name="manager" required lay-verify="required" placeholder="负责人"
+                       autocomplete="off"
+                       class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">部门</label>
+            <div class="layui-input-block">
+                <input value="{$user.department}" type="text" name="department" required lay-verify="required"
+                       placeholder="部门" autocomplete="off"
+                       class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">签约日</label>
+            <div class="layui-input-block">
+                <input type="text" name="contract_date" required lay-verify="required" autocomplete="off"
+                       class="layui-input" id="contract_date">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">到期日</label>
+            <div class="layui-input-block">
+                <input type="text" name="due_date" required lay-verify="required" autocomplete="off"
+                       class="layui-input" id="due_date">
+            </div>
+        </div>
+        <fieldset class="layui-elem-field">
+            <legend>上传合同文件</legend>
+            <div class="layui-field-box">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">标题</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="contract_file[title]" autocomplete="off"
+                               class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">文件地址</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="contract_file[src]" autocomplete="off"
+                               class="layui-input">
+                    </div>
+                </div>
+                <button type="button" class="layui-btn" id="uploadBtn">
+                    <i class="layui-icon">&#xe67c;</i>选择文件
+                </button>
+            </div>
+        </fieldset>
+        <fieldset class="layui-elem-field">
+            <legend>附加项</legend>
+            <div class="layui-field-box" id="extra">
+
+            </div>
+            <div class="layui-field-box" style="padding-top: 0">
+                <a id="plus" class="layui-btn layui-btn-sm layui-btn-fluid" style="padding: 0 100px;">
+                    <i class="layui-icon">&#xe654;</i>
+                </a>
+            </div>
+        </fieldset>
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">备注</label>
+            <div class="layui-input-block">
+                <textarea name="note" placeholder="请输入内容" class="layui-textarea"></textarea>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn" lay-submit lay-filter="formDemo">立即提交</button>
+                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+            </div>
+        </div>
+    </form>
+</div>
+{/block}
+
+{block name="js"}
+{__block__}
+<script>
+    layui.use(['form', 'laydate', 'upload'], function () {
+        var $ = layui.jquery;
+        var form = layui.form;
+        var laydate = layui.laydate;
+        var upload = layui.upload;
+        console.log($('input[name="extra[0][\'content\']"]'))
+        // plus extra input
+        var extraBox = $('#extra');
+        var plusCount = 0;
+        $('#plus').click(function () {
+            plusCount++;
+            var extraE = '               <div class="layui-form-item extra' + plusCount + '">\n' +
+                '                    <label class="layui-form-label">标题</label>\n' +
+                '                    <div class="layui-input-block">\n' +
+                '                        <input type="text" name="extra[' + plusCount + '][title]" required lay-verify="required"\n' +
+                '                               placeholder="标题" autocomplete="off"\n' +
+                '                               class="layui-input">\n' +
+                '                    </div>\n' +
+                '                </div>\n' +
+                '                <div class="layui-form-item extra' + plusCount + '">\n' +
+                '                    <label class="layui-form-label">内容</label>\n' +
+                '                    <div class="layui-input-block">\n' +
+                '                        <input type="text" name="extra[' + plusCount + '][content]" required lay-verify="required"\n' +
+                '                               placeholder="内容" autocomplete="off"\n' +
+                '                               class="layui-input">\n' +
+                '                    </div>\n' +
+                '                </div>\n' +
+                '                <a class="layui-btn layui-btn-normal layui-btn-sm layui-btn-fluid subtract extra' + plusCount + '" data-num="' + plusCount + '">\n' +
+                '                    <i class="layui-icon">&#xe640;</i>\n' +
+                '                </a>\n' +
+                '                <hr class="layui-bg-gray  extra' + plusCount + '">';
+            extraBox.append(extraE);
+            // subtract extra input
+            $('a.extra'+plusCount).click(function () {
+                var that = $(this);
+                layer.confirm('确定要删除该附加项吗', {icon: 3, title:'提示'}, function(index){
+                    layer.close(index);
+                    $('.extra'+that.data('num')).remove();
+                });
+            });
+        });
+        // date
+        laydate.render({
+            elem: '#contract_date' //指定元素
+        });
+        laydate.render({
+            elem: '#due_date' //指定元素
+        });
+        // 监听category select
+        var category = null;
+        form.on('select(category)', function (data) {
+            // console.log(data.value);
+            // console.log(data.elem);
+            category = $(data.elem);
+            $.get({
+                url: '/type/getByCategoryId/' + data.value,
+                success: function (result) {
+                    if (result == -1) {
+                        layer.msg('非法操作');
+                    } else {
+                        var options = '<option value></option>';
+                        for (var i in result) {
+                            options += '<option value="' + result[i]['id'] + '" data-sn="' + result[i]['sn'] + '">' + result[i]['name'] + '</option>'
+                        }
+                        console.log(options);
+                        $('select[name="type_id"]').empty().append(options);
+                        form.render('select');
+                    }
+                },
+                fail: function (error) {
+                    console.log(error);
+                }
+            });
+        });
+        // 监听type select
+        form.on('select(type)', function (data) {
+            var sn = $(data.elem).find('option:selected').data('sn');
+            console.log(sn);
+            var contractSn = category.find('option:selected').text() + '-' + sn;
+            // 获取合同编号
+            $.get({
+                url: '/contract/getContractSn/' + category.val() + '/' + data.value,
+                success: function (result) {
+                    if (result == -1) {
+                        layer.msg('非法操作');
+                    } else {
+                        contractSn += '-' + result;
+                        $('input[name="contract_sn"]').val(contractSn)
+                    }
+                },
+                fail: function (error) {
+                    console.log(error)
+                }
+            });
+        });
+        // 监听 customer select
+        form.on('select(customer)', function (data) {
+            $.get({
+                url: '/linkman/getByCustomerId/' + data.value,
+                success: function (result) {
+                    var options = '<option value></option>';
+                    for (var i in result) {
+                        options += '<option value="' + result[i]['id'] + '">' + result[i]['name'] + '</option>'
+                    }
+                    console.log(options);
+                    $('select[name="linkman_id"]').empty().append(options);
+                    form.render('select');
+                },
+                fail: function (error) {
+                    console.log(error)
+                }
+            });
+        })
+        // 提交
+        form.on('submit(formDemo)', function (data) {
+            var index1 = layer.load(1);
+            $.post({
+                type: 'POST',
+                url: '/contract/add',
+                data: data.field,
+                success: function (result) {
+                    console.log(result);
+                    layer.close(index1);
+                    if (result === 1) {
+                        layer.msg('合同添加成功', function () {
+                            location.href = '/contract/all';
+                        });
+                    } else if (result === -1) {
+                        layer.open({content: '添加失败！合同已存在！', icon: 2});
+                    }
+                },
+                error: function (error) {
+                    layer.close(index1);
+                    layer.msg('内部错误，添加失败', {icon: 2});
+                    console.log(error);
+                }
+            });
+            return false;
+        });
+        // upload
+        var uploadInst = upload.render({
+            elem: '#uploadBtn',
+            url: '/upload/',
+            accept: 'file',
+            field: 'file',
+            before: function (obj) {
+                console.log(obj)
+                obj.preview(function(index, file, result){
+                    console.log(file); //得到文件对象
+                    if ($('input[name="contract_file[title]"]').val() == '') {
+                        $('input[name="contract_file[title]"]').val(file.name);
+                    }
+                });
+                layer.load();
+            },
+            done: function (res) {
+                layer.closeAll('loading');
+                console.log(res);
+                if (res.code == 0) {
+                    $('input[name="contract_file[src]"]').val(res.data.src);
+                } else {
+                    layer.open({content:res.msg, icon:2});
+                }
+            },
+            error: function (error) {
+                layer.closeAll('loading');
+                console.log(error);
+            }
+        })
+    });
+</script>
+{/block}

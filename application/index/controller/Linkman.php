@@ -78,5 +78,12 @@ class Linkman extends BaseController
         ]);
         return $this->fetch();
     }
+    // get by customer id
+    public function getByCustomerId()
+    {
+        $customerId = $this->request->param('id');
+        $linkmans = LinkmanModel::where('customer_id', 'eq', $customerId)->select();
+        return json($linkmans);
+    }
 
 }

@@ -1,0 +1,177 @@
+{extend name="common/base"}
+{block name="content"}
+<div class="layui-container">
+    <form class="layui-form layui-form-pane" action="">
+        <div class="layui-form-item">
+            <label class="layui-form-label">审批名称</label>
+            <div class="layui-input-block">
+                <input type="text" name="name" required lay-verify="required" placeholder="审批流程名称" autocomplete="off"
+                       class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">关联合同</label>
+            <div class="layui-input-block">
+                <select name="contract_id" lay-verify="required" lay-filter="contract" lay-search>
+                    <option value></option>
+                    {volist name="contracts" id="contract"}
+                    {if !$contract.approval}
+                    <option value="{$contract.id}">{$contract.name}</option>
+                    {/if}
+                    {/volist}
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">状态</label>
+            <div class="layui-input-block">
+                <input type="checkbox" name="start" value="2" lay-skin="switch" lay-text="启用|锁定" lay-filter="start">
+            </div>
+        </div>
+        <fieldset class="layui-elem-field">
+            <legend>审批节点</legend>
+            <div class="layui-field-box">
+                <ul class="layui-timeline" id="line">
+                    <!--<li class="layui-timeline-item">-->
+                        <!--<i class="layui-icon layui-timeline-axis">&#xe63f;</i>-->
+                        <!--<div class="layui-timeline-content layui-text">-->
+                            <!--<h3 class="layui-timeline-title">张三</h3>-->
+                            <!--<p>-->
+                                <!--审核状态：待审-->
+                                <!--<br>-->
+                                <!--审批意见：可以-->
+                            <!--</p>-->
+                        <!--</div>-->
+                    <!--</li>-->
+                </ul>
+                <a class="layui-btn layui-btn-xs layui-btn-radius layui-btn-danger" id="user">
+                    <i class="layui-icon">&#xe608;</i> 添加审批人
+                </a>
+            </div>
+        </fieldset>
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">备注</label>
+            <div class="layui-input-block">
+                <textarea name="note" placeholder="请输入内容" class="layui-textarea"></textarea>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn" lay-submit lay-filter="formDemo">立即提交</button>
+                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+            </div>
+        </div>
+    </form>
+</div>
+{/block}
+
+{block name="js"}
+{__block__}
+<script>
+    // 审批人列表
+    var users = {$users};
+    // 审批人备份
+    var users2 = {$users};
+    // 添加的节点
+    var nodes = {};
+    // 记录节点排序
+    var node_number = 0;
+
+    layui.use(['form'], function () {
+        var $ = layui.jquery;
+        var form = layui.form;
+        //监听提交
+        form.on('submit(formDemo)', function(data){
+            var index1 = layer.load(1);
+            data.field.start = $('input[name="start"]').val();
+            data.field.nodes = nodes;
+            console.log(data.field)
+            $.post({
+                type: 'POST',
+                url: '/approval/add',
+                data: data.field,
+                success: function (result) {
+                    console.log(result);
+                    layer.close(index1);
+                    if (result === 1) {
+                        layer.msg('审批流程添加成功', function () {
+                            location.href='/approval/all';
+                        });
+                    } else if (result === -1) {
+                        layer.open({content:'添加失败！该合同已关联过其它审批流！', icon:2});
+                    }
+                },
+                error: function (error) {
+                    layer.close(index1);
+                    layer.msg('内部错误，添加失败', {icon: 2});
+                    console.log(error);
+                }
+            });
+            return false;
+        });
+        // 监听开关
+        form.on('switch(start)', function(data){
+            if (data.elem.checked) {
+                $(data.elem).val(1);
+            } else {
+                $(data.elem).val(2);
+            }
+            console.log($(data.elem).val());
+        });
+        // 选择审批人
+        $('#user').click(function () {
+            var content = '<form class="layui-form"><select name="user" lay-verify="" lay-search id="pick-user">\n';
+            content += '  <option value="">请选择一个审批人</option>\n';
+            for (var i in users) {
+                content += '<option value="'+i+'">'+users[i]['name']+'</option>';
+            }
+            content += '</select></form>';
+            var userLayerIndex = layer.open({
+                title: '选择审批人',
+                content: content,
+                btn: '选好了',
+                area: ['300px','500px'],
+                yes: function () {
+                    var userIndex = $('#pick-user').val();
+                    if (userIndex.length > 0) {
+                        var line = $('#line');
+                        var nodeE = '<li class="layui-timeline-item node'+userIndex+'">\n' +
+                            '                        <i class="layui-icon layui-timeline-axis">&#xe63f;</i>\n' +
+                            '                        <div class="layui-timeline-content layui-text">\n' +
+                            '                            <h3 class="layui-timeline-title">'+users[userIndex]['name']+'  <a class="layui-btn layui-btn-xs layui-btn-primary node'+userIndex+'" data-index="'+userIndex+'" style="margin-left: 20px;"><i class="layui-icon">&#xe640;</i></a></h3>\n' +
+                            '                            <p>\n' +
+                            '                                待审\n' +
+                            '                                <br>\n'
+                            '                            </p>\n' +
+                            '                        </div>\n' +
+                            '                    </li>';
+                        line.append(nodeE);
+                        // 排序+1
+                        node_number ++ ;
+                        // 添加人员,用于入库
+                        nodes[userIndex] = {user_id: users[userIndex]['id'], node_number: node_number};
+                        // 删除已添加的人员
+                        delete users[userIndex];
+                        // 绑定node删除事件
+                        $('a.node'+userIndex).click(function () {
+                            layer.confirm('确定要删除该审批人吗', {icon: 3, title:'提示'}, function(index){
+                                //do something
+                                $('.node'+userIndex).remove();
+                                // 删除节点
+                                delete nodes[userIndex];
+                                // 添加审批人列表
+                                users[userIndex] = users2[userIndex];
+                                console.log(nodes);
+                                layer.close(index);
+                            });
+                        });
+                    }
+                    layer.close(userLayerIndex);
+                }
+            });
+            form.render('select');
+        });
+    });
+
+</script>
+{/block}

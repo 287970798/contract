@@ -1,5 +1,7 @@
 .idea
 database.php
+database.bak.php
 composer.lock
 *.log
 thinkphp
+/public/uploads

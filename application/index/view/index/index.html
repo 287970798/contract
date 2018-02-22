@@ -1,4 +1,44 @@
 {extend name="common/base"}
 {block name="content"}
-{$Think.session.admin.level}
+
+{/block}
+
+{block name="js"}
+{__block__}
+<script>
+    layui.use(['layer'], function () {
+        var layer = layui.layer;
+        var $ = layui.jquery;
+        $.get({
+            url: '/contract/expiring',
+            success: function (result) {
+                console.log(result.length);
+                if (result.length > 1) {
+                    var content = '';
+                    content += '<div class="layui-fluid">';
+                    for (var i = 0; i < result.length; i++) {
+                        content += '  <div class="layui-row">\n' +
+                                '<div class="layui-col">'+
+                                    result[i]['name'] + ' ' + result[i]['days'] +'天后到期' +
+                                '</div>' +
+                                    '  </div>'
+                    }
+                    content += '</div>';
+                    layer.open({
+                        type: 0,
+                        offset: 'rb',
+                        anim: 2,
+                        title: '您有' + result.length + '个合同即将到期',
+                        content: content,
+                        btn: '查看所有',
+                        btnAlign: 'c',
+                        yes: function () {
+                            location.href = '/contract/expiring';
+                        }
+                    });
+                }
+            }
+        });
+    });
+</script>
 {/block}

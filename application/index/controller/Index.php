@@ -8,6 +8,7 @@ class Index extends BaseController
 {
     public function index()
     {
+
         $this->assign([
             'title' => '控制台'
         ]);
