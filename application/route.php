@@ -54,4 +54,10 @@ Route::rule('upload', 'file/upload');
 // approval
 Route::rule('approval/add', 'approval/add');
 Route::rule('approval/edit/:id', 'approval/edit');
+Route::rule('approval/del/:id', 'approval/del');
 Route::rule('approval/all', 'approval/all');
+Route::rule('approval/user/:id', 'approval/ApprovalByUser'); // 我发起的审批
+Route::rule('approval/:id', 'approval/ApprovalById');
+
+// approval node
+Route::rule('node/approval/:id', 'node/approval');

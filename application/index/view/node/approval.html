@@ -1,0 +1,144 @@
+{extend name="common/base"}
+{block name="content"}
+<table id="node" lay-filter="node"></table>
+<script type="text/html" id="operateBar">
+    <a class="layui-btn layui-btn-xs" lay-event="detail">查看</a>
+
+    <!-- 这里同样支持 laytpl 语法，如： -->
+    {{#  if(d.status > -1){ }}
+    <a class="layui-btn layui-btn-xs" lay-event="check">审核</a>
+    {{#  } }}
+</script>
+
+{/block}
+
+{block name="js"}
+{__block__}
+<script>
+    layui.use(['form', 'table'], function () {
+        var $ = layui.jquery;
+        var table = layui.table;
+        var form = layui.form;
+        table.render({
+            elem: '#node'
+            ,height: 'full-220'
+            ,data: {$nodes}
+            ,page: true //开启分页
+            ,cols: [[ //表头
+                {checkbox: true},
+                {title: 'ID', templet: '<div>{{d.approval.id}}</div>', width: 100, sort: true}
+                ,{title: '审批名称', templet: '<div>{{d.approval.name}}</div>',sort: true}
+                ,{title: '合同', templet: '<div>{{d.approval.contract.name}}</div>',sort: true}
+                ,{title: '操作',fixed: 'right', width:250, align:'center', toolbar: '#operateBar'}
+            ]]
+        });
+        table.on('tool(node)', function(obj) { //注：tool是工具条事件名，test是table原始容器的属性 lay-filter="对应的值"
+            var data = obj.data; //获得当前行数据
+            var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
+            var tr = obj.tr; //获得当前行 tr 的DOM对象
+            console.log(data);
+            // 删除
+            if (layEvent === 'del') {
+                layer.confirm('确定要删除吗', {icon: 3, title:'提示'}, function(index){
+                    var delLoadingIndex = layer.load(1);
+                    $.ajax({
+                        type: 'DELETE',
+                        url: '/customer/del/' + data.id,
+                        success: function (result) {
+                            layer.close(delLoadingIndex);
+                            if (result === 1) {
+                                obj.del();
+                                layer.msg('操作成功');
+                                console.log(result);
+                            } else {
+                                layer.msg('操作失败');
+                                console.log(result);
+                            }
+                        },
+                        error: function (error) {
+                            layer.close(delLoadingIndex);
+                            layer.msg('操作失败');
+                            console.log(error)
+                        }
+                    });
+
+                    layer.close(index);
+                });
+            }
+            // 编辑
+            if (layEvent === 'edit') {
+                location.href = '/customer/edit/' + data.id;
+            }
+            // 查看详情
+            if (layEvent === 'detail') {
+                layer.open({
+                    type: 1,
+                    area: ['500px'],
+                    btn: '确定',
+                    btnAlign: 'c',
+                    title: '客户详情',
+                    content: '<div style="padding: 10px;">' +
+                    '<table class="layui-table">' +
+                    '<tr><th style="font-weight: bold;" width="80">ID</th><td>'+data.id+'</td></tr>' +
+                    '<tr><th style="font-weight: bold;">客户名称</th><td>'+data.name+'</td></tr>' +
+                    '<tr><th style="font-weight: bold;">备注</th><td>'+data.note+'</td></tr>' +
+                    '<tr><th style="font-weight: bold;">创建时间</th><td>'+data.create_time+'</td></tr>' +
+                    '</table>' +
+                    '</div>' //这里content是一个普通的String
+                });
+            }
+            // 审核
+            if (layEvent === 'check') {
+                var index = layer.open({
+                    type: 2,
+                    area: ['500px', '600px'],
+                    content: 'http://ht.uniteedu.cn/approval/' + data.approval_id,
+                    btn:['通过', '驳回', '什么都不做，返回'],
+                    btnAlign: 'c',
+                    yes: function (index, layero) {
+                        layer.prompt({
+                            formType: 2,
+                            value: '',
+                            title: '请输入审批意见',
+                        }, function(value, index, elem){
+                            alert(value); //得到value
+                            layer.close(index);
+                        });
+                    },
+                    btn2: function (index, layero) {
+                        layer.prompt({
+                            formType: 2,
+                            value: '',
+                            btn:['确定', '不写'],
+                            title: '请输入驳回理由',
+                            yes: function (index, layero) {
+                                console.log($(layero).find('textarea').val());
+                            },
+                            btn2: function (index, layero) {
+                                alert('write nothing');
+                            }
+                        }, function(value, index, elem){
+                            alert(value); //得到value
+                            layer.close(index);
+                        });
+                        return false;
+                    }
+                });
+                layer.full(index);
+            }
+        })
+        // 监听开关
+        // table.on('switch(status)', function(data){
+        //     data.status = 5;
+        //     console.log(data)
+        //     console.log($(data.elem).val())
+        //     if (data.elem.checked) {
+        //         $(data.elem).val(1);
+        //     } else {
+        //         $(data.elem).val(2);
+        //     }
+        //     // console.log($(data.elem).val());
+        // });
+    })
+</script>
+{/block}

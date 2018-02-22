@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="cn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>
+        {//标题}
+        {block name="title"}{$title}{/block}
+    </title>
+    {// 引入的css文件}
+    {block name="include-css"}
+    {include file="common/css"}
+    {/block}
+
+    {//自定义css}
+    {block name="css"}
+    <style>
+        .layui-icon {
+            font-size: 16px;
+        }
+    </style>
+    {/block}
+</head>
+<body class="layui-layout-body">
+{block name="content"}
+<!-- 内容主体区域 -->
+内容主体区域
+{/block}
+
+{// 包含的js文件}
+{block name="include-js"}
+{include file="common/js"}
+{/block}
+
+{// 自定义的js代码}
+{block name="js"}
+<script>
+    //JavaScript代码区域
+    layui.use('element', function () {
+        var element = layui.element;
+    });
+</script>
+{/block}
+</body>
+</html>

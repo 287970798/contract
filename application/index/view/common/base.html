@@ -74,7 +74,7 @@
             <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
             <ul class="layui-nav layui-nav-tree" lay-filter="test">
                 <li class="layui-nav-item layui-nav-itemed">
-                    <a class="" href="javascript:;"><i class="layui-icon">&#xe60a;</i> 合同管理</a>
+                    <a class="" href="javascript:;"><i class="layui-icon">&#xe60a;</i> 合同</a>
                     <dl class="layui-nav-child">
                         <dd><a href="/contract/add">新增合同</a></dd>
                         <dd><a href="/contract/all">全部合同</a></dd>
@@ -82,27 +82,26 @@
                     </dl>
                 </li>
                 <li class="layui-nav-item">
-                    <a href="javascript:;"><i class="layui-icon">&#xe613;</i> 合同审批</a>
+                    <a href="javascript:;"><i class="layui-icon">&#xe613;</i> 审批</a>
                     <dl class="layui-nav-child">
-                        <dd><a href="javascript:;">全部审批</a></dd>
-                        <dd><a href="javascript:;">待审批</a></dd>
+                        <dd><a href="/node/approval/{$Think.session.admin.id}">我的审批</a></dd>
+                        <dd><a href="/approval/user/{$Think.session.admin.id}">我发起的审批</a></dd>
                         <dd><a href="javascript:;">未通过的审批</a></dd>
+                        <dd><a href="/approval/all">全部审批</a></dd>
+                        <dd><a href="/approval/add">新建审批</a></dd>
                     </dl>
                 </li>
                 <li class="layui-nav-item">
-                    <a href="javascript:;"><i class="layui-icon">&#xe614;</i> &nbsp;合同设置</a>
+                    <a href="javascript:;"><i class="layui-icon">&#xe614;</i> &nbsp;设置</a>
                     <dl class="layui-nav-child">
-                        <dd><a href="/approval/all">审批流程</a></dd>
-                        <dd><a href="/approval/add">新建审批</a></dd>
                         <dd><a href="/category/all">合同分类</a></dd>
                         <dd><a href="/category/add">新增合同分类</a></dd>
                         <dd><a href="/type/all">合同类型</a></dd>
                         <dd><a href="/type/add">新增合同类型</a></dd>
-                        <dd><a href="javascript:;">修改记录</a></dd>
                     </dl>
                 </li>
                 <li class="layui-nav-item">
-                    <a href="javascript:;"><i class="layui-icon">&#xe613;</i> 客户管理</a>
+                    <a href="javascript:;"><i class="layui-icon">&#xe613;</i> 客户</a>
                     <dl class="layui-nav-child">
                         <dd><a href="/customer/all">客户列表</a></dd>
                         <dd><a href="/linkman/all">联系人列表</a></dd>
@@ -117,8 +116,8 @@
                         <dd><a href="javascript:;">用户登录记录</a></dd>
                     </dl>
                 </li>
-                <li class="layui-nav-item"><a href="">合同上传</a></li>
-                <li class="layui-nav-item"><a href="">其它管理</a></li>
+                <li class="layui-nav-item"><a href="">上传</a></li>
+                <li class="layui-nav-item"><a href="">其它</a></li>
             </ul>
         </div>
     </div>
@@ -141,7 +140,6 @@
                 </div>
             </div>
         </div>
-
     </div>
 
     {//底部}
@@ -152,6 +150,10 @@
         {/block}
     </div>
 </div>
+
+{// block other 这里放置其它内容 比如通过DOM调用的layer弹出层content}
+{block name="other"}{/block}
+
 {// 包含的js文件}
 {block name="include-js"}
 {include file="common/js"}

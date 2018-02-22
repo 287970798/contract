@@ -15,4 +15,9 @@ class ApprovalNode extends BaseModel
     {
         return $this->belongsTo('User', 'user_id', 'id');
     }
+
+    public function approval()
+    {
+        return $this->belongsTo('Approval', 'approval_id', 'id');
+    }
 }

@@ -3,6 +3,13 @@
 <div class="layui-container">
     <form class="layui-form layui-form-pane" action="">
         <div class="layui-form-item">
+            <label class="layui-form-label">审批发起人</label>
+            <div class="layui-input-block">
+                <input type="text" value="{$approval.user.name}" autocomplete="off"
+                       class="layui-input" disabled>
+            </div>
+        </div>
+        <div class="layui-form-item">
             <label class="layui-form-label">审批名称</label>
             <div class="layui-input-block">
                 <input value="{$approval.name}" type="text" name="name" required lay-verify="required"
@@ -38,13 +45,13 @@
             <legend>审批节点</legend>
             <div class="layui-field-box">
                 <ul class="layui-timeline" id="line">
-                    {volist name="nodes2" id="node"}
+                    {volist name="nodesData" id="node"}
                     <li class="layui-timeline-item node{$node.user_id}">
                         <i class="layui-icon layui-timeline-axis">&#xe63f;</i>
                         <div class="layui-timeline-content layui-text">
                             <h3 class="layui-timeline-title">
                                 {$node.user.name}
-                                <a class="layui-btn layui-btn-xs layui-btn-primary node{$node.user_id}" style="margin-left: 20px;"><i class="layui-icon">&#xe640;</i></a>
+                                <a class="layui-btn layui-btn-xs layui-btn-primary node" data-id="{$node.user_id}" style="margin-left: 20px;"><i class="layui-icon">&#xe640;</i></a>
                             </h3>
                             <p>
                                 待审
@@ -73,27 +80,133 @@
         </div>
     </form>
 </div>
+
 {/block}
 
 {block name="js"}
 {__block__}
 <script>
-    // 备用审批人
-    var users = {$users};
-    var users2 = {$users};
-    // 添加的节点
-    var nodes = {$nodes};
-    // 记录节点排序
-    var node_number = 0;
+    /**
+     * 未实现的功能
+     * 节点前后交换，实现节点上移下移
+     * var change = function (nodeA, nodeB) {var n = nodeA.next(), p = nodeB.prev(); b.insertBefore(n); a.insertAfter(p);}
+     * 交换位置的同时，将该两个节点加入nodes.change，并且，两个节点的node_number互换
+     * 后端使用node.change数据进行更新操作
+     * */
 
+    /*
+    * 初始化数据
+    *
+    * */
+    // 用户数据
+    var user = {
+        list: {$users},     // 审批人选择列表
+        origin: {$users}    // 所有用户数据
+    }
+
+    // 用于存放节点的对象
+    // 删除节点：删除nodes.has中节点，nodes.total--，nodes.del中添加删除的节点id，在user.origin中取相关节点添加到user.list中
+    // 新增节点：nodes.add中添加选择的节点，nodes.total++，nodes.maxNodeNum++，user.list删除被选择的节点
+    // 删除新增的节点：nodes.add中删除该节点，nodes.total--，在user.origin中取出相关节点添加到user.list中
+    // user_id作为统一识别节点与用户的唯一标识，以user_id做为索引
+    var nodes = {
+        has: {$nodes},    // 已存在的节点
+        del: {},    // 被删除的节点
+        add: {},     // 新添加的节点
+        maxNodeNum: {$maxNodeNum},   // 当前最大节点排序号
+        total: {$totalNodes}
+    };
+
+    // 遍历已存在的节点，删除已存在的审批人,用来生成审批人选择列表
+    for (var i in nodes.has) {
+        delete user.list[i];
+    }
+
+    /*
+    * 业务处理
+    *
+    * */
     layui.use(['form'], function () {
         var $ = layui.jquery;
         var form = layui.form;
+
+        // 已存在节点绑定删除事件
+        $('a.node').click(function () {
+            var that = $(this);
+            var userIndex = that.data('id');
+            layer.confirm('确定要删除该审批人吗', {icon: 3, title:'提示'}, function(index){
+                //do something
+                $('.node'+userIndex).remove();
+                // 删除节点
+                nodes.del[userIndex] = nodes.has[userIndex];
+                delete nodes.has[userIndex];
+                nodes.total-- ;
+                // 添加审批人列表
+                user.list[userIndex] = user.origin[userIndex];
+                layer.close(index);
+                console.log(nodes)
+            });
+        });
+        // 添加节点
+        $('#user').click(function () {
+            var content = '<form class="layui-form"><select name="user" lay-verify="" lay-search id="pick-user">\n';
+            content += '  <option value="">请选择一个审批人</option>\n';
+            for (var i in user.list) {
+                content += '<option value="'+i+'">'+user.list[i]['name']+'</option>';
+            }
+            content += '</select></form>';
+            var userLayerIndex = layer.open({
+                title: '选择审批人',
+                content: content,
+                btn: '选好了',
+                area: ['300px','500px'],
+                yes: function () {
+                    var userIndex = $('#pick-user').val();
+                    if (userIndex.length > 0) {
+                        var line = $('#line');
+                        var nodeE = '<li class="layui-timeline-item node'+userIndex+'">\n' +
+                            '                        <i class="layui-icon layui-timeline-axis">&#xe63f;</i>\n' +
+                            '                        <div class="layui-timeline-content layui-text">\n' +
+                            '                            <h3 class="layui-timeline-title">'+user.list[userIndex]['name']+'  <a class="layui-btn layui-btn-xs layui-btn-primary node'+userIndex+'" data-index="'+userIndex+'" style="margin-left: 20px;"><i class="layui-icon">&#xe640;</i></a></h3>\n' +
+                            '                            <p>\n' +
+                            '                                待审\n' +
+                            '                                <br>\n'
+                        '                            </p>\n' +
+                        '                        </div>\n' +
+                        '                    </li>';
+                        line.append(nodeE);
+                        // 排序与总节点数+1
+                        nodes.total ++ ;
+                        nodes.maxNodeNum ++;
+                        // 新增节点到nodes.add
+                        nodes.add[userIndex] = {user_id: userIndex, node_number: nodes.maxNodeNum, approval_id: {$approval.id}};
+                        //删除user.list中的该用户
+                        delete user.list[userIndex];
+
+                        // 绑定新增加node的删除事件
+                        $('a.node'+userIndex).click(function () {
+                            layer.confirm('确定要删除该审批人吗', {icon: 3, title:'提示'}, function(index){
+                                //do something
+                                $('.node'+userIndex).remove();
+                                // 删除节点
+                                delete nodes.add[userIndex];
+                                nodes.total-- ;
+                                // 添加审批人列表
+                                user.list[userIndex] = user.origin[userIndex];
+                                layer.close(index);
+                            });
+                        });
+                    }
+                    layer.close(userLayerIndex);
+                }
+            });
+            form.render('select');
+        });
         //监听提交
         form.on('submit(formDemo)', function (data) {
             var index1 = layer.load(1);
             data.field.start = $('input[name="start"]').val();
-            console.log(data.field)
+            data.field.nodes = nodes;
             $.post({
                 type: 'POST',
                 url: '/approval/edit/{$approval.id}',
