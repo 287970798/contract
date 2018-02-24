@@ -4,6 +4,7 @@
 namespace app\index\controller;
 
 use app\index\model\Customer as CustomerModel;
+use think\Session;
 
 class Customer extends BaseController
 {
@@ -13,12 +14,18 @@ class Customer extends BaseController
     {
         if ($this->request->isAjax() && $this->request->isPost()) {
             $post = $this->request->post();
+
             $customer = new CustomerModel();
             // 检测客户是否已存在
             $one = $customer->where('name', 'eq', $post['name'])->find();
             if ($one) {
                 return -1; // 客户存在
             }
+
+            // 记录用户id
+            $user = Session::get('admin');
+            $post['user_id'] = $user['id'];
+
             $result = $customer->allowField(true)->save($post);
             return $result;
         }

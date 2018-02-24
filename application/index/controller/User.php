@@ -36,6 +36,13 @@ class User extends BaseController
     public function edit()
     {
         $id = $this->request->param('id');
+        $admin = Session::get('admin');
+
+        // 禁止修改别人资料
+        if ($admin['level'] != 1 && $id != $admin['id']){
+            $this->error('非法操作，无权限');
+        }
+
         if ($this->request->isPost() && $this->request->isAjax()) {
             $post = $this->request->post();
             // 如果有密码并且为空，则不修改

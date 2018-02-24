@@ -1,21 +1,152 @@
 {extend name="common/base"}
 {block name="content"}
-
+<div class="layui-row layui-col-space10">
+        <div class="layui-col-md6">
+            <div class="layui-tab layui-tab-card">
+                <ul class="layui-tab-title">
+                    <li class="layui-this">最新合同</li>
+                    <li>即将到期</li>
+                    <li>已过期</li>
+                </ul>
+                <div class="layui-tab-content" style="height: 216px;">
+                    <div class="layui-tab-item layui-show">
+                        <table class="layui-table">
+                            {volist name="contracts.new" id="contract" empty="暂时没有数据"}
+                            <tr>
+                                <td>{$contract.name}</td>
+                                <td width="160">{$contract.create_time}</td>
+                            </tr>
+                            {/volist}
+                        </table>
+                    </div>
+                    <div class="layui-tab-item">
+                        <table class="layui-table">
+                            {volist name="contracts.expiring" id="contract" empty="暂时没有数据"}
+                            <tr>
+                                <td>{$contract.name}</td>
+                                <td width="160">
+                                    <span style="color: #FFB800;">{$contract.days}天后到期</span>
+                                </td>
+                            </tr>
+                            {/volist}
+                        </table>
+                    </div>
+                    <div class="layui-tab-item">
+                        <table class="layui-table">
+                            {volist name="contracts.overdue" id="contract" empty="暂时没有数据"}
+                            <tr>
+                                <td>{$contract.name}</td>
+                                <td width="160">
+                                    <span style="color: #FF5722;">已过期{$contract.days|abs}天</span>
+                                </td>
+                            </tr>
+                            {/volist}
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="layui-col-md6">
+            <div class="layui-tab layui-tab-card">
+                <ul class="layui-tab-title">
+                    <li class="layui-this">我发起的审批</li>
+                    <li>我审批的</li>
+                </ul>
+                <div class="layui-tab-content" style="height: 216px;">
+                    <div class="layui-tab-item layui-show">
+                        <table class="layui-table">
+                            <thead>
+                            <tr><th>审批名</th><th>关联合同</th><th>当前审批人</th><th>审批进度</th></tr>
+                            </thead>
+                            <tbody>
+                            {volist name="approvals.beSponsor" id="approval" empty="暂时没有数据"}
+                            <tr>
+                                <td>{$approval.name}</td>
+                                <td>{$approval.contract.name}</td>
+                                <td>{$approval.currentNode.user.name}</td>
+                                <td width="100" style="font-weight: bold;">{:ceil($approval.process/$approval.total_nodes*100)}%</td>
+                            </tr>
+                            {/volist}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="layui-tab-item">
+                        <table class="layui-table">
+                            <thead>
+                            <tr><th>审批名</th><th>关联合同</th><th>更新时间</th></tr>
+                            </thead>
+                            <tbody>
+                            {volist name="approvals.beSponsor" id="approval" empty="暂时没有数据"}
+                            <tr>
+                                <td>{$approval.name}</td>
+                                <td>{$approval.contract.name}</td>
+                                <td>{$approval.update_time}</td>
+                            </tr>
+                            {/volist}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+</div>
+<div class="layui-row layui-col-space10">
+        <div class="layui-col-md6">
+            <div class="layui-tab layui-tab-card">
+                <ul class="layui-tab-title">
+                    <li class="layui-this">我添加的客户</li>
+                </ul>
+                <div class="layui-tab-content" style="height: 100px;">
+                    <div class="layui-tab-item layui-show">
+                        <table class="layui-table">
+                            {volist name="customers" id="customer" empty="暂时没有数据"}
+                            <tr>
+                                <td>{$customer.name}</td>
+                                <td width="160">{$customer.create_time}</td>
+                            </tr>
+                            {/volist}
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="layui-col-md6">
+            <div class="layui-tab layui-tab-card">
+                <ul class="layui-tab-title">
+                    <li class="layui-this">我添加的联系人</li>
+                </ul>
+                <div class="layui-tab-content" style="height: 100px;">
+                    <div class="layui-tab-item layui-show">
+                        <table class="layui-table">
+                            {volist name="linkmans" id="linkman" empty="暂时没有数据"}
+                            <tr>
+                                <td>{$linkman.name}</td>
+                                <td width="160">{$linkman.create_time}</td>
+                            </tr>
+                            {/volist}
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+</div>
 {/block}
 
 {block name="js"}
 {__block__}
 <script>
-    layui.use(['layer'], function () {
+    layui.use(['layer','table'], function () {
         var layer = layui.layer;
+        var table = layui.table;
         var $ = layui.jquery;
+        table.render();
         $.get({
             url: '/contract/expiring',
             success: function (result) {
                 console.log(result.length);
                 if (result.length > 1) {
                     var content = '';
-                    content += '<div class="layui-fluid">';
+                    // content += '<div class="layui-fluid">';
                     for (var i = 0; i < result.length; i++) {
                         content += '  <div class="layui-row">\n' +
                                 '<div class="layui-col">'+
@@ -23,7 +154,7 @@
                                 '</div>' +
                                     '  </div>'
                     }
-                    content += '</div>';
+                    // content += '</div>';
                     layer.open({
                         type: 0,
                         offset: 'rb',

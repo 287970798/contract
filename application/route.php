@@ -44,6 +44,7 @@ Route::rule('contract/expiring', 'contract/expiring');
 Route::rule('contract/edit/:id', 'contract/edit');
 Route::rule('contract/del/:id', 'contract/del');
 Route::rule('contract/getContractSn/:category_id/:type_id', 'contract/getContractSn');
+Route::rule('contract/search', 'contract/search');
 
 // contract extra
 Route::rule('contractExtra/del/:id', 'contractExtra/del');

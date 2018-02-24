@@ -25,4 +25,9 @@ class Approval extends BaseModel
     {
         return $this->hasMany('ApprovalNode', 'approval_id', 'id')->order('node_number asc');
     }
+
+    public function currentNode()
+    {
+        return $this->belongsTo('ApprovalNode', 'current_node_id', 'id');
+    }
 }

@@ -5,6 +5,7 @@ namespace app\index\controller;
 
 use app\index\model\Linkman as LinkmanModel;
 use app\index\model\Customer;
+use think\Session;
 
 class Linkman extends BaseController
 {
@@ -22,6 +23,11 @@ class Linkman extends BaseController
             if ($one) {
                 return -1; // 联系人存在
             }
+
+            // 记录用户id
+            $user = Session::get('admin');
+            $post['user_id'] = $user['id'];
+
             $result = $linkman->allowField(true)->save($post);
             return $result;
         }

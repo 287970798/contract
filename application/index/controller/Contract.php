@@ -18,6 +18,7 @@ use think\Db;
 use think\Exception;
 use think\Session;
 use app\index\model\Contract as ContractModel;
+use app\index\model\Approval;
 
 class Contract extends BaseController
 {
@@ -177,10 +178,19 @@ class Contract extends BaseController
     public function all()
     {
         $contracts = ContractModel::with('category,type,customer,linkman,file,extra')->order('id desc')->select();
-        $contracts = json_encode($contracts);
+//        $contracts = json_encode($contracts);
+        // 获取筛选数据
+        $customers = Customer::all();
+        $types = Type::all();
+        $categories = Category::all();
         $this->assign([
             'title' => '合同管理',
-            'contracts' => $contracts
+            'icon' => '<span class="icon-contract icon"></span>',
+            'contracts' => $contracts,
+            'customers' => $customers,
+            'categories' => $categories,
+            'types' => $types
+
         ]);
         return $this->fetch();
     }
@@ -194,6 +204,13 @@ class Contract extends BaseController
         if (!is_numeric($id) && !is_int($id)) {
             return 'error';
         }
+
+        // 是否处于审批中
+        $one = Approval::where('contract_id', $id)->where('start', 1)->find();
+        if ($one) {
+            return '该合同在审批中';
+        }
+
 
         Db::startTrans();
         try{
@@ -262,5 +279,15 @@ class Contract extends BaseController
             $maxSn = str_pad($maxSn, 2, '0', STR_PAD_LEFT);
         }
         return $maxSn;
+    }
+
+    // search
+    public function search()
+    {
+        if (!$this->request->isAjax() && !$this->request->isPost()) {
+            return '非法操作';
+        }
+        $post = $this->request->post();
+        print_r($post);
     }
 }

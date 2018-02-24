@@ -1,5 +1,120 @@
 {extend name="common/base"}
+{block name="css"}
+{__block__}
+<style>
+    .filter-item {
+        padding-top: 2px;
+        padding-bottom: 2px;
+    }
+
+    #more-filter {
+        display: none;
+    }
+</style>
+{/block}
 {block name="content"}
+<table id="filter" lay-filter="filter">
+    <tr>
+        <td width="60">
+            <span class="layui-badge layui-bg-gray" style="font-size: 10px;height: 30px; line-height: 15px;padding: 5px 10px;"><i class="layui-icon">&#xe615;</i><br>筛选</span>
+        </td>
+        <td>
+            <form class="layui-form  layui-form-pane">
+                <div class="layui-inline filter-item">
+                    <label class="layui-form-label">名称</label>
+                    <div class="layui-input-inline">
+                        <select name="contract[name]" lay-filter="name" lay-search>
+                            <option value></option>
+                            {volist name="contracts" id="contract"}
+                            <option value="{$contract.name}">{$contract.name}</option>
+                            {/volist}
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-inline filter-item">
+                    <label class="layui-form-label">编号</label>
+                    <div class="layui-input-inline">
+                        <select name="contract[contract_sn]" lay-filter="contract_sn" lay-search>
+                            <option value></option>
+                            {volist name="contracts" id="contract"}
+                            <option value="{$contract.contract_sn}">{$contract.contract_sn}</option>
+                            {/volist}
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-inline filter-item">
+                    <label class="layui-form-label">客户</label>
+                    <div class="layui-input-inline">
+                        <select name="customer[id]" lay-filter="customer" lay-search>
+                            <option value></option>
+                            {volist name="customers" id="customer"}
+                            <option value="{$customer.id}">{$customer.name}</option>
+                            {/volist}
+                        </select>
+                    </div>
+                </div>
+                <span id="more-filter">
+                <div class="layui-inline filter-item">
+                    <label class="layui-form-label">类别</label>
+                    <div class="layui-input-inline">
+                        <select name="category[id]" lay-filter="category" lay-search>
+                            <option value></option>
+                            {volist name="categories" id="category"}
+                            <option value="{$category.id}">{$category.name}</option>
+                            {/volist}
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-inline filter-item">
+                    <label class="layui-form-label">类型</label>
+                    <div class="layui-input-inline">
+                        <select name="type[id]" lay-filter="type" lay-search>
+                            <option value></option>
+                            {volist name="types" id="type"}
+                            <option value="{$type.id}">{$type.name}</option>
+                            {/volist}
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-inline filter-item">
+                    <label class="layui-form-label">负责人</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="manager[name]" placeholder="负责人姓名" autocomplete="off"
+                               class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-inline filter-item">
+                    <label class="layui-form-label">签约日</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="contract_date[start]" required lay-verify="required" autocomplete="off"
+                               class="layui-input" id="contract_date_start">
+                    </div>
+                    -
+                    <div class="layui-input-inline">
+                        <input type="text" name="contract_date[end]" required lay-verify="required" autocomplete="off"
+                               class="layui-input" id="contract_date_end">
+                    </div>
+                </div>
+                <div class="layui-inline filter-item">
+                    <label class="layui-form-label">到期日</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="due_date[start]" required lay-verify="required" autocomplete="off"
+                               class="layui-input" id="due_date_start">
+                    </div>
+                    -
+                    <div class="layui-input-inline">
+                        <input type="text" name="due_date[end]" required lay-verify="required" autocomplete="off"
+                               class="layui-input" id="due_date_end">
+                    </div>
+                </div>
+
+                </span>
+                <a class="layui-btn" id="more-btn">高级</a>
+                <button class="layui-btn" lay-submit lay-filter="search">搜索</button>
+            </form>
+        </td>
+    </tr>
+</table>
 <table id="contract" lay-filter="contract"></table>
 <script type="text/html" id="operateBar">
     <a class="layui-btn layui-btn-xs" lay-event="detail">查看</a>
@@ -17,35 +132,83 @@
 {block name="js"}
 {__block__}
 <script>
-    console.log({$contracts})
-    layui.use(['form', 'table'], function () {
+    layui.use(['form', 'table','laydate'], function () {
         var $ = layui.jquery;
         var table = layui.table;
         var form = layui.form;
+        var laydate = layui.laydate;
+        // date
+        laydate.render({
+            elem: '#contract_date_start' //指定元素
+        });
+        laydate.render({
+            elem: '#contract_date_end' //指定元素
+        });
+        laydate.render({
+            elem: '#due_date_start' //指定元素
+        });
+        laydate.render({
+            elem: '#due_date_end' //指定元素
+        });
+        // filter
+        // more toggle
+        $('#more-btn').click(function () {
+            var moreFilter = $('#more-filter');
+            var moreBtn = $('#more-btn');
+            if ((moreFilter.css('display')) === 'none') {
+                moreFilter.show();
+                moreBtn.html('简洁');
+            } else {
+                moreFilter.hide();
+                moreBtn.html('高级');
+            }
+        });
+        // filter submit
+        form.on('submit(search)', function (data) {
+            console.log(data.field);
+            layer.msg('开发中');
+            $.post({
+                url: '/contract/search',
+                data: data.field,
+                success: function (result) {
+                    console.log(result)
+                },
+                fail: function (error) {
+                    console.log(error)
+                }
+            })
+            return false;
+        });
+
         table.render({
             elem: '#contract'
-            ,height: 'full-220'
-            ,data: {$contracts}
-            ,page: true //开启分页
-            ,cols: [[ //表头
+            , height: 'full-270'
+            , data: {$contracts}
+            , page: true //开启分页
+            , cols: [[ //表头
                 {checkbox: true},
                 {field: 'id', title: 'ID', width: 100, sort: true}
-                ,{field: 'contract_sn', title: '合同编号',sort: true}
-                ,{field: 'name', title: '合同标题',sort: true}
-                ,{field: 'type', title: '合同类型', templet: '<div>{{d.type.name}}</div>',sort: true}
-                ,{field: 'manager', title: '负责人',sort: true}
-                ,{field: 'due_date', title: '到期日', templet: '<div>{{new Date(d.due_date * 1000).toLocaleDateString()}}</div>',sort: true}
-                ,{title: '操作',fixed: 'right', width:150, align:'center', toolbar: '#operateBar'}
+                , {field: 'contract_sn', title: '合同编号', sort: true}
+                , {field: 'name', title: '合同标题', sort: true}
+                , {field: 'type', title: '合同类型', templet: '<div>{{d.type.name}}</div>', sort: true}
+                , {field: 'manager', title: '负责人', sort: true}
+                , {
+                    field: 'due_date',
+                    title: '到期日',
+                    templet: '<div>{{new Date(d.due_date * 1000).toLocaleDateString()}}</div>',
+                    sort: true
+                }
+                , {title: '操作', fixed: 'right', width: 150, align: 'center', toolbar: '#operateBar'}
             ]]
         });
-        table.on('tool(contract)', function(obj) { //注：tool是工具条事件名，test是table原始容器的属性 lay-filter="对应的值"
+        table.on('tool(contract)', function (obj) { //注：tool是工具条事件名，test是table原始容器的属性 lay-filter="对应的值"
             var data = obj.data; //获得当前行数据
             var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
             var tr = obj.tr; //获得当前行 tr 的DOM对象
             console.log(data);
             // 删除
             if (layEvent === 'del') {
-                layer.confirm('确定要删除吗', {icon: 3, title:'提示'}, function(index){
+                layer.confirm('确定要删除吗', {icon: 3, title: '提示'}, function (index) {
                     var delLoadingIndex = layer.load(1);
                     $.ajax({
                         type: 'DELETE',
@@ -57,7 +220,7 @@
                                 layer.msg('操作成功');
                                 console.log(result);
                             } else {
-                                layer.msg('操作失败');
+                                layer.msg('操作失败 ' + result);
                                 console.log(result);
                             }
                         },
@@ -80,31 +243,31 @@
             if (layEvent === 'detail') {
                 var dueDays = '';
                 if (data.days) {
-                    dueDays = '<span class="layui-badge" style="margin-left: 15px;">'+data.days+'天后过期</span>';
+                    dueDays = '<span class="layui-badge" style="margin-left: 15px;">' + data.days + '天后过期</span>';
                 }
                 var content = '<div style="padding: 10px;">' +
                     '<table class="layui-table">' +
-                    '<tr><th style="font-weight: bold;" width="80">ID</th><td>'+data.id+'</td></tr>' +
-                    '<tr><th style="font-weight: bold;">合同编号</th><td>'+data.contract_sn+'</td></tr>' +
-                    '<tr><th style="font-weight: bold;">合同名称</th><td>'+data.name+'</td></tr>' +
-                    '<tr><th style="font-weight: bold;">签约日</th><td>'+new Date(data.contract_date * 1000).toLocaleDateString()+'</td></tr>' +
-                    '<tr><th style="font-weight: bold;">到期日</th><td>'+new Date(data.due_date * 1000).toLocaleDateString()+dueDays+'</td></tr>' +
-                    '<tr><th style="font-weight: bold;">客户名称</th><td>'+data.customer.name+'</td></tr>' +
-                    '<tr><th style="font-weight: bold;">客户联系人</th><td>'+data.linkman.name+ ' ' + data.linkman.phone + '</td></tr>' +
-                    '<tr><th style="font-weight: bold;">备注</th><td>'+data.note+'</td></tr>' +
-                    '<tr><th style="font-weight: bold;">合同负责人</th><td>'+data.manager+'</td></tr>' +
-                    '<tr><th style="font-weight: bold;">合同所属部门</th><td>'+data.department+'</td></tr>';
+                    '<tr><th style="font-weight: bold;" width="80">ID</th><td>' + data.id + '</td></tr>' +
+                    '<tr><th style="font-weight: bold;">合同编号</th><td>' + data.contract_sn + '</td></tr>' +
+                    '<tr><th style="font-weight: bold;">合同名称</th><td>' + data.name + '</td></tr>' +
+                    '<tr><th style="font-weight: bold;">签约日</th><td>' + new Date(data.contract_date * 1000).toLocaleDateString() + '</td></tr>' +
+                    '<tr><th style="font-weight: bold;">到期日</th><td>' + new Date(data.due_date * 1000).toLocaleDateString() + dueDays + '</td></tr>' +
+                    '<tr><th style="font-weight: bold;">客户名称</th><td>' + data.customer.name + '</td></tr>' +
+                    '<tr><th style="font-weight: bold;">客户联系人</th><td>' + data.linkman.name + ' ' + data.linkman.phone + '</td></tr>' +
+                    '<tr><th style="font-weight: bold;">备注</th><td>' + data.note + '</td></tr>' +
+                    '<tr><th style="font-weight: bold;">合同负责人</th><td>' + data.manager + '</td></tr>' +
+                    '<tr><th style="font-weight: bold;">合同所属部门</th><td>' + data.department + '</td></tr>';
                 if (data.extra.length > 0) {
                     for (var i in data.extra) {
-                        content += '<tr><th style="font-weight: bold;">'+data.extra[i]['title']+'</th><td>'+data.extra[i]['content']+'</td></tr>';
+                        content += '<tr><th style="font-weight: bold;">' + data.extra[i]['title'] + '</th><td>' + data.extra[i]['content'] + '</td></tr>';
                     }
                 }
                 if (data.file) {
-                    content += '<tr><th style="font-weight: bold;">附件</th><td><a href="/uploads/'+data.file.src+'" type="button" class="layui-btn">\n' +
-                        '                    <i class="layui-icon">&#xe67c;</i>'+data.file.title+'\n' +
+                    content += '<tr><th style="font-weight: bold;">附件</th><td><a href="/uploads/' + data.file.src + '" type="button" class="layui-btn">\n' +
+                        '                    <i class="layui-icon">&#xe67c;</i>' + data.file.title + '\n' +
                         '                </a></td></tr>';
                 }
-                content += '<tr><th style="font-weight: bold;">创建时间</th><td>'+data.create_time+'</td></tr>' +
+                content += '<tr><th style="font-weight: bold;">创建时间</th><td>' + data.create_time + '</td></tr>' +
                     '</table>' +
                     '</div>';
                 var index = layer.open({
@@ -114,7 +277,7 @@
                     btn: '确定',
                     btnAlign: 'c',
                     title: '合同详情',
-                    content:  content//这里content是一个普通的String
+                    content: content//这里content是一个普通的String
                 });
                 layer.full(index);
             }

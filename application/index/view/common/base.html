@@ -20,31 +20,35 @@
         .layui-icon {
             font-size: 16px;
         }
+        .icon{
+            font-size: 20px;
+            vertical-align: middle;
+        }
+        .menu{
+            vertical-align: middle;
+            margin-left: 5px;
+        }
     </style>
     {/block}
 </head>
 <body class="layui-layout-body">
 <div class="layui-layout layui-layout-admin">
+
     {//头部}
     {block name="header"}
     <div class="layui-header">
-        <div class="layui-logo">The First One</div>
+        <div class="layui-logo">
+            <span class="icon icon-sys" style="font-size: 30px;vertical-align: middle;"></span>
+            <span style="font-size: 18px;vertical-align: middle;">合同管理系统</span>
+        </div>
         <!-- 头部区域（可配合layui已有的水平导航） -->
         <ul class="layui-nav layui-layout-left">
             <li class="layui-nav-item"><a href="/">控制台</a></li>
             <li class="layui-nav-item">
-                <a href="javascript:;">用户</a>
-                <dl class="layui-nav-child">
-                    <dd><a href="/user/all">用户管理</a></dd>
-                    <dd><a href="/user/add">新增用户</a></dd>
-                </dl>
-            </li>
-            <li class="layui-nav-item">
                 <a href="javascript:;">系统设置</a>
                 <dl class="layui-nav-child">
-                    <dd><a href="">邮件管理</a></dd>
-                    <dd><a href="">消息管理</a></dd>
-                    <dd><a href="">授权管理</a></dd>
+                    <dd><a href="">基本设置</a></dd>
+                    <dd><a href="">高级设置</a></dd>
                 </dl>
             </li>
         </ul>
@@ -58,8 +62,12 @@
                     <img src="http://t.cn/RCzsdCq" class="layui-nav-img layui-hide">{$Think.session.admin.name}
                 </a>
                 <dl class="layui-nav-child">
-                    <dd><a href="">基本资料</a></dd>
-                    <dd><a href="">安全设置</a></dd>
+                    <dd>
+                        <a href="/user/edit/{$Think.session.admin.id}">
+                            <span class="icon icon-profile"></span>
+                            <span class="menu">基本资料</span>
+                        </a>
+                    </dd>
                 </dl>
             </li>
             <li class="layui-nav-item"><a href="/logout">退出</a></li>
@@ -74,7 +82,10 @@
             <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
             <ul class="layui-nav layui-nav-tree" lay-filter="test">
                 <li class="layui-nav-item layui-nav-itemed">
-                    <a class="" href="javascript:;"><i class="layui-icon">&#xe60a;</i> 合同</a>
+                    <a class="" href="javascript:;">
+                        <span class="icon icon-contract"></span>
+                        <span class="menu">合同</span>
+                    </a>
                     <dl class="layui-nav-child">
                         <dd><a href="/contract/add">新增合同</a></dd>
                         <dd><a href="/contract/all">全部合同</a></dd>
@@ -82,7 +93,10 @@
                     </dl>
                 </li>
                 <li class="layui-nav-item">
-                    <a href="javascript:;"><i class="layui-icon">&#xe613;</i> 审批</a>
+                    <a href="javascript:;">
+                        <span class="icon icon-flow"></span>
+                        <span class="menu">审批</span>
+                    </a>
                     <dl class="layui-nav-child">
                         <dd><a href="/node/approval/{$Think.session.admin.id}">我审批的</a></dd>
                         <dd><a href="/approval/user/{$Think.session.admin.id}">我发起的</a></dd>
@@ -92,16 +106,10 @@
                     </dl>
                 </li>
                 <li class="layui-nav-item">
-                    <a href="javascript:;"><i class="layui-icon">&#xe614;</i> &nbsp;设置</a>
-                    <dl class="layui-nav-child">
-                        <dd><a href="/category/all">合同分类</a></dd>
-                        <dd><a href="/category/add">新增合同分类</a></dd>
-                        <dd><a href="/type/all">合同类型</a></dd>
-                        <dd><a href="/type/add">新增合同类型</a></dd>
-                    </dl>
-                </li>
-                <li class="layui-nav-item">
-                    <a href="javascript:;"><i class="layui-icon">&#xe613;</i> 客户</a>
+                    <a href="javascript:;">
+                        <span class="icon icon-customer"></span>
+                        <span class="menu">客户</span>
+                    </a>
                     <dl class="layui-nav-child">
                         <dd><a href="/customer/all">客户列表</a></dd>
                         <dd><a href="/linkman/all">联系人列表</a></dd>
@@ -110,14 +118,39 @@
                     </dl>
                 </li>
                 <li class="layui-nav-item">
-                    <a href="javascript:;"><i class="layui-icon">&#xe62c;</i> 日志</a>
+                    <a href="javascript:;">
+                        <span class="icon icon-user"></span>
+                        <span class="menu">用户</span>
+                    </a>
+                    <dl class="layui-nav-child">
+                        <dd><a href="/user/all">用户管理</a></dd>
+                        <dd><a href="/user/add">新增用户</a></dd>
+                    </dl>
+                </li>
+                <li class="layui-nav-item">
+                    <a href="javascript:;">
+                        <span class="icon icon-setting" style="font-size: 19px;"></span>
+                        <span class="menu">设置</span>
+                    </a>
+                    <dl class="layui-nav-child">
+                        <dd><a href="/category/all">合同分类</a></dd>
+                        <dd><a href="/category/add">新增合同分类</a></dd>
+                        <dd><a href="/type/all">合同类型</a></dd>
+                        <dd><a href="/type/add">新增合同类型</a></dd>
+                    </dl>
+                </li>
+                <li class="layui-nav-item">
+                    <a href="javascript:;">
+                        <span class="icon icon-log"></span>
+                        <span class="menu">日志</span>
+                    </a>
                     <dl class="layui-nav-child">
                         <dd><a href="javascript:;">合同修改记录</a></dd>
                         <dd><a href="javascript:;">用户登录记录</a></dd>
                     </dl>
                 </li>
-                <li class="layui-nav-item"><a href="">上传</a></li>
-                <li class="layui-nav-item"><a href="">其它</a></li>
+                <li class="layui-nav-item layui-hide"><a href="">上传</a></li>
+                <li class="layui-nav-item layui-hide"><a href="">其它</a></li>
             </ul>
         </div>
     </div>
@@ -127,7 +160,10 @@
     <div class="layui-body">
         <div class="layui-tab" lay-filter="bodyTab">
             <ul class="layui-tab-title">
-                <li class="layui-this">{$title}</li>
+                <li class="layui-this">
+                    {if isset($icon)}{$icon} {/if}
+                    {$title}
+                </li>
             </ul>
             <div class="layui-tab-content" style="height: 100px;">
                 <div class="layui-tab-item layui-show">
