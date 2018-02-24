@@ -13,9 +13,9 @@
 </script>
 <script type="text/html" id="statusBar">
     {{#  if(d.status == 1){ }}
-    <a lay-event="status"><input type="checkbox" name="status" value="1" checked="checked" lay-skin="switch" lay-text="启用|锁定"  lay-filter="status"></a>
+    <a lay-event="status"><input id="status{{d.id}}" type="checkbox" name="status" value="1" checked="checked" lay-skin="switch" lay-text="启用|锁定"  lay-filter="status"></a>
     {{# }else{ }}
-    <a lay-event="status"><input type="checkbox" name="status" value="2" lay-skin="switch" lay-text="启用|锁定" lay-filter="status"></a>
+    <a lay-event="status"><input id="status{{d.id}}" type="checkbox" name="status" value="2" lay-skin="switch" lay-text="启用|锁定" lay-filter="status"></a>
     {{# } }}
 </script>
 
@@ -35,7 +35,7 @@ layui.use(['form', 'table'], function () {
         ,page: true //开启分页
         ,cols: [[ //表头
             {checkbox: true},
-            {field: 'id', title: 'ID',sort: true}
+            {field: 'id', title: 'ID', width: 100, sort: true}
             ,{field: 'username', title: '用户名',sort: true}
             ,{field: 'name', title: '姓名',sort: true}
             ,{field: 'department', title: '部门',sort: true}
@@ -110,30 +110,29 @@ layui.use(['form', 'table'], function () {
             var statusLoadIndex = layer.load(1);
             var switchE = $(tr).find('input:eq(0)');
             var switchE2 = $(tr).find('.layui-form-switch:eq(0)');
-            // console.log(switchE.get(0).checked);
             // 获取切换后的值
-            var switchV = switchE.get(0).checked ? 1 : 2;
+            var checkbox = $('#status'+data.id).get(0);
+            var status = checkbox.checked ? 1 : 2;
+
             // 入库
             $.post({
                 url: '/user/edit/' + data.id,
-                data: {status: switchV},
+                data: {status: status},
                 success: function (result) {
                     layer.close(statusLoadIndex);
                     if (result === 1) {
                         // 入库成功更改switch value值
-                        switchE.val(switchV);
+                        checkbox.value = status;
                         // 更改数据源的值
-                        obj.data.status = switchV;
+                        obj.data.status = status;
                         layer.msg('操作成功');
                     } else {
                         // 入库失败，更改switch状态
                         // 更改checked
                         // 更改em text
-                        console.log(switchE.get(0).checked)
-                        switchE.get(0).checked = !switchE.get(0).checked;
-                        console.log(switchE.get(0).checked)
+                        checkbox.checked = !checkbox.checked;
                         // 更改switch className
-                        if (switchE.get(0).checked) {
+                        if (checkbox.checked) {
                             switchE2.addClass('layui-form-onswitch');
                             switchE2.find('em').text('启用');
                         } else {

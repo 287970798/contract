@@ -57,7 +57,12 @@ Route::rule('approval/edit/:id', 'approval/edit');
 Route::rule('approval/del/:id', 'approval/del');
 Route::rule('approval/all', 'approval/all');
 Route::rule('approval/user/:id', 'approval/ApprovalByUser'); // 我发起的审批
-Route::rule('approval/:id', 'approval/ApprovalById');
+Route::any('approval/:id', 'approval/ApprovalById', [], ['id'=>'\d+']);
+Route::rule('approval/start/:id', 'approval/setStart');
 
 // approval node
 Route::rule('node/approval/:id', 'node/approval');
+Route::rule('node/check$', 'node/check');
+
+// test 测试curl发送邮件
+Route::rule('test/mail', 'test/mail');

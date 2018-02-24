@@ -89,40 +89,106 @@
             }
             // 审核
             if (layEvent === 'check') {
+                console.log(data)
+                var approvalBtn = data.status == 0 ? ['通过', '驳回', '什么都不做，返回'] : ['返回'];
+                var cancelFun = function (index2, layero) {
+                    layer.confirm('确定不审批吗', {icon: 3, title:'提示'}, function (index) {
+                        layer.close(index2);
+                        layer.close(index);
+                    })
+                    return false;
+                }
+                var passFun = function (baseIndex, layero) {
+                    layer.prompt({
+                        formType: 2,
+                        value: '通过',
+                        title: '请输入审批意见',
+                        btn: ['确定','取消'],
+                        yes: function (index, layero) {
+                            var note = layero.find('textarea').val();
+                            if (note.length === 0) {
+                                layer.msg('请填写审批意见')
+                                return false;
+                            }
+                            var postData = {
+                                id: data.id,
+                                approval_id: data.approval_id,
+                                status: 1,
+                                note: note
+                            };
+                            $.post({
+                                url: '/node/check',
+                                data: postData,
+                                success: function (result) {
+                                    if (result == 1) {
+                                        layer.msg('审批操作完成', function () {
+                                            layer.closeAll();
+                                        });
+                                    } else {
+                                        console.log(result)
+                                        layer.msg('审批失败');
+                                    }
+                                },
+                                fail: function (error) {
+                                    console.log(error)
+                                }
+                            });
+                        },
+                        btn2: cancelFun,
+                        cancel: cancelFun
+                    });
+                }
+                var rejectFun = function (index, layero) {
+                    layer.prompt({
+                        formType: 2,
+                        value: '驳回',
+                        title: '请输入驳回理由',
+                        btn: ['确定','取消'],
+                        yes: function (index, layero) {
+                            var note = layero.find('textarea').val();
+                            if (note.length === 0) {
+                                layer.msg('请填写驳回理由')
+                                return false;
+                            }
+                            var postData = {
+                                id: data.id,
+                                approval_id: data.approval_id,
+                                status: 2,
+                                note: note
+                            };
+                            $.post({
+                                url: '/node/check',
+                                data: postData,
+                                success: function (result) {
+                                    if (result == 1) {
+                                        layer.msg('审批操作完成', function () {
+                                            layer.closeAll();
+                                        });
+                                    } else {
+                                        console.log(result)
+                                        layer.msg('审批失败');
+                                    }
+                                },
+                                fail: function (error) {
+                                    console.log(error)
+                                }
+                            });
+                        },
+                        btn2: cancelFun,
+                        cancel: cancelFun
+                    });
+                    return false;
+                }
+                var backFun = function (index, layero) {layer.close(index)}
+                var yesFun = data.status === 0 ? passFun : backFun;
                 var index = layer.open({
                     type: 2,
                     area: ['500px', '600px'],
                     content: 'http://ht.uniteedu.cn/approval/' + data.approval_id,
-                    btn:['通过', '驳回', '什么都不做，返回'],
+                    btn: approvalBtn,
                     btnAlign: 'c',
-                    yes: function (index, layero) {
-                        layer.prompt({
-                            formType: 2,
-                            value: '',
-                            title: '请输入审批意见',
-                        }, function(value, index, elem){
-                            alert(value); //得到value
-                            layer.close(index);
-                        });
-                    },
-                    btn2: function (index, layero) {
-                        layer.prompt({
-                            formType: 2,
-                            value: '',
-                            btn:['确定', '不写'],
-                            title: '请输入驳回理由',
-                            yes: function (index, layero) {
-                                console.log($(layero).find('textarea').val());
-                            },
-                            btn2: function (index, layero) {
-                                alert('write nothing');
-                            }
-                        }, function(value, index, elem){
-                            alert(value); //得到value
-                            layer.close(index);
-                        });
-                        return false;
-                    }
+                    yes: yesFun,
+                    btn2: rejectFun
                 });
                 layer.full(index);
             }

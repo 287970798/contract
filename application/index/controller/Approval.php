@@ -18,6 +18,9 @@ use think\Session;
 
 class Approval extends BaseController
 {
+    protected $beforeActionList = [
+        'checkAuth' => ['only' => 'all']
+    ];
     // add
     public function add()
     {
@@ -36,6 +39,10 @@ class Approval extends BaseController
                 $nodes = $post['nodes'];
                 $post['total_nodes'] = $nodes['total'];
                 unset($post['nodes']);
+                // 如果节点不为空则该审批可开启，否则不可开启
+                if ($post['start'] == 1) {
+                    if (empty($nodes['add'])) $post['start'] = 2;
+                }
             }
             Db::startTrans();
             try{
@@ -50,6 +57,10 @@ class Approval extends BaseController
                 }
                 // 提交事务
                 Db::commit();
+                // 开启审批
+                if ($post['start'] == 1) {
+                    $this->start($approvalModel->id);
+                }
                 return $result;
             } catch (Exception $e) {
                 Db::rollback();
@@ -73,7 +84,9 @@ class Approval extends BaseController
         if ($this->request->isAjax() && $this->request->isPost()) {
 
             // 验证该审批流状态，如果已进入审批，则不能修改
-            // todo...
+            if (ApprovalModel::get($id)->start == 1) {
+                return '当前审批为开启状态，不可修改';
+            }
 
             $post = $this->request->post();
             // 节点数据
@@ -82,6 +95,11 @@ class Approval extends BaseController
                 unset($post['nodes']);
                 // 总节点数
                 $post['total_nodes'] = $nodes['total'];
+
+                // 如果节点不为空则该审批可开启，否则不可开启
+                if ($post['start'] == 1) {
+                    if ($nodes['total'] == 0) $post['start'] = 2;
+                }
             }
             // 事务
             Db::startTrans();
@@ -101,6 +119,11 @@ class Approval extends BaseController
                 }
                 // 提交事务
                 Db::commit();
+
+                // 开启审批
+                if ($post['start'] == 1) {
+                    $this->start($id);
+                }
                 return $result;
             } catch (Exception $e) {
                 Db::rollback();
@@ -231,9 +254,82 @@ class Approval extends BaseController
 
     }
     // update start
+
+    /**
+     * start=1
+     * first node start
+     * 如果审批还没开始，则同时开启第一个节点
+     * 如果审批过程中的流程处于锁定状态，则只打开锁定状态即可。
+     */
+    public function start($approvalId)
+    {
+        // 这里要时行权限验证
+        // 只有管理员和发起用户才能启用和关闭审批流
+        // todo...
+
+        Db::startTrans();
+        try {
+            // 开启第一个节点
+            $firstNode = ApprovalNode::where('approval_id', 'eq', $approvalId)->order('node_number asc')->find();
+            if (!$firstNode) {
+                throw new Exception('当前审批没有节点');
+            }
+            if ($firstNode->status == -1) {     // 如果是第1次开启
+                // 开启第1个节点
+                $firstNode->status = 0;
+                $firstNode->save();
+
+                $data = [
+                    'start' => 1,   // 审批开启
+                    'status' => 1,  // 审批中
+                    'current_node_id' => $firstNode->id     // 当前审批节点
+                ];
+            } else {    // 如果是中途暂停的
+                $data = [
+                    'start' => 1
+                ];
+            }
+
+            // 开启审批并将第1个节点设置为当前节点,审批状态设置为审批中
+            $approvalModel = new ApprovalModel();
+            $result = $approvalModel->save($data, ['id' => $approvalId]);
+
+            Db::commit();
+        } catch (Exception $e) {
+            Db::rollback();
+            return $e->getMessage();
+        }
+        return $result;
+    }
+
+    /**
+     * @return false|int|string
+     */
     public function setStart()
     {
+        if (!$this->request->isAjax() || !$this->request->isPost()) {
+            return '非法操作';
+        }
+        $id = $this->request->param('id');
+        $start = $this->request->post('start');
+        if ($start == 1) {
+            $result = $this->start($id);
+        } else {
+            $result = $this->stop($id);
+        }
+        return $result;
+    }
 
+    /**
+     * stop
+     * 随时可停止
+     *
+     */
+    public static function stop($approvalId)
+    {
+        $approval = ApprovalModel::get($approvalId);
+        $data = ['start'=>2];
+        return $approval->save($data);
     }
     // update total nodes
     public function setTotalNodes()

@@ -13,9 +13,9 @@
 </script>
 <script type="text/html" id="startBar">
     {{#  if(d.start == 1){ }}
-    <a lay-event="start"><input type="checkbox" name="start" value="1" checked="checked" lay-skin="switch" lay-text="启用|锁定"  lay-filter="start"></a>
+    <a lay-event="start"><input type="checkbox" name="start" value="1" checked="checked" lay-skin="switch" lay-text="启用|锁定" id="start{{d.id}}"  lay-filter="start"></a>
     {{# }else{ }}
-    <a lay-event="start"><input type="checkbox" name="start" value="2" lay-skin="switch" lay-text="启用|锁定" lay-filter="start"></a>
+    <a lay-event="start"><input type="checkbox" name="start" value="2" lay-skin="switch" lay-text="启用|锁定" id="start{{d.id}}" lay-filter="start"></a>
     {{# } }}
 </script>
 
@@ -38,15 +38,16 @@ layui.use(['form', 'table'], function () {
             {field: 'id', title: 'ID',width: 100, sort: true}
             ,{field: 'name', title: '审批名',sort: true}
             ,{field: 'contract', title: '关联合同', templet: '<div>{{d.contract.name}}</div>', sort: true}
-            ,{field: 'start', title: '启用', width:150, templet: '<div>{{d.start==1?"启用":"锁定"}}</div>', align:'center'}
+            ,{title: '状态', width:150, align:'center', toolbar: '#startBar'}
             ,{title: '操作',fixed: 'right', width:150, align:'center', toolbar: '#operateBar'}
         ]]
     });
+
     table.on('tool(approval)', function(obj) { //注：tool是工具条事件名，test是table原始容器的属性 lay-filter="对应的值"
         var data = obj.data; //获得当前行数据
         var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
         var tr = obj.tr; //获得当前行 tr 的DOM对象
-        console.log(data);
+        // console.log(data);
         // 删除
         if (layEvent === 'del') {
             layer.confirm('确定要删除吗', {icon: 3, title:'提示'}, function(index){
@@ -100,19 +101,82 @@ layui.use(['form', 'table'], function () {
             });
         }
         // 启用状态更改
+        if (layEvent === 'start'){
+            var startLoadIndex = layer.load(1);
+            var switchE = $(tr).find('input:eq(0)');
+            var switchE2 = $(tr).find('.layui-form-switch:eq(0)');
+            // console.log(switchE)
+            // console.log($('#start'+data.id).get(0).checked);
+            // switchE.get(0).checked = !switchE.get(0).checked;
+
+            var checkbox = $('#start'+data.id).get(0);
+            var start = checkbox.checked ? 1 : 2;
+
+            // 入库
+            $.post({
+                url: '/approval/start/' + data.id,
+                data: {start: start},
+                success: function (result) {
+                    layer.close(startLoadIndex);
+                    if (result === 1) {
+                        // 入库成功更改switch value值
+                        checkbox.value = start;
+                        // 更改数据源的值
+                        obj.data.start = start;
+                        layer.msg('操作成功');
+                    } else {
+                        // 入库失败，更改switch状态
+                        // 更改checked
+                        // 更改em text
+                        checkbox.checked = !checkbox.checked;
+                        // 更改switch className
+                        if (checkbox.checked) {
+                            switchE2.addClass('layui-form-onswitch');
+                            switchE2.find('em').text('启用');
+                        } else {
+                            switchE2.removeClass('layui-form-onswitch');
+                            switchE2.find('em').text('锁定');
+                        }
+                        console.log(result);
+                        layer.msg('操作失败 ' + result);
+                    }
+                },
+                error: function (error) {
+                    console.log(error);
+                    // 入库失败，更改switch状态
+                    // 更改checked
+                    // 更改em text
+                    console.log(switchE.get(0).checked)
+                    switchE.get(0).checked = !switchE.get(0).checked;
+                    console.log(switchE.get(0).checked)
+                    // 更改switch className
+                    if (switchE.get(0).checked) {
+                        switchE2.addClass('layui-form-onswitch');
+                        switchE2.find('em').text('启用');
+                    } else {
+                        switchE2.removeClass('layui-form-onswitch');
+                        switchE2.find('em').text('锁定');
+                    }
+                    layer.msg('内部错误，操作失败');
+                }
+            });
+
+        }
     })
     // 监听开关
-    // table.on('switch(start)', function(data){
-    //     data.start = 5;
-    //     console.log(data)
-    //     console.log($(data.elem).val())
-    //     if (data.elem.checked) {
-    //         $(data.elem).val(1);
-    //     } else {
-    //         $(data.elem).val(2);
-    //     }
-    //     // console.log($(data.elem).val());
-    // });
+    table.on('switch(start)', function(data){
+        data.start = 5;
+        console.log(data)
+        console.log($(data.elem).val())
+        if (data.elem.checked) {
+            $(data.elem).val(1);
+        } else {
+            $(data.elem).val(2);
+        }
+        // console.log($(data.elem).val());
+    });
+
+
 })
 </script>
 {/block}

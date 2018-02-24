@@ -53,7 +53,7 @@ class Contract extends BaseController
             try{
                 $result = $contract->allowField(true)->save($post);
                 // 附加数据添加contract_id
-                if (isset($extra)) {
+                if (isset($extra) && !empty($extra)) {
                     foreach ($extra as &$item) {
                         $item['contract_id'] = $contract->id;
                     }
@@ -61,7 +61,7 @@ class Contract extends BaseController
                     $extraModel->saveAll($extra);
                 }
                 // 附件数据添加contract_id
-                if (isset($file)) {
+                if (isset($file) && !empty($file['src'])) {
                     $file['contract_id'] = $contract->id;
                     $contractFileModel = new ContractFile();
                     $contractFileModel->save($file);

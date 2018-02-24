@@ -1,5 +1,12 @@
 {extend name="common/dialog" /}
-
+{block name="css"}
+{__block__}
+<style>
+.date{
+    font-size: 12px; margin-left: 20px;
+}
+</style>
+{/block}
 {block name="content"}
 <div class="layui-container">
     <table class="layui-table">
@@ -56,7 +63,8 @@
                 <li class="layui-timeline-item">
                     <i class="layui-icon layui-timeline-axis">&#xe63f;</i>
                     <div class="layui-timeline-content layui-text">
-                        <h3 class="layui-timeline-title">{$approval.user.name} 发起申请</h3>
+                        <h3 class="layui-timeline-title">{$approval.user.name} 发起申请 <span class="date">{$approval.create_time}</span></h3>
+
                         <p>
                             {$approval.note}
                         </p>
@@ -73,6 +81,8 @@
                             {elseif $node.status == 1  /} 审核通过
                             {elseif $node.status == 2  /} 未通过
                             {/if}
+
+                            {if $node.status >= 0}<span class="date">{$node.update_time}</span>{/if}
                         </h4>
                         <p>
                             {$node.note}
@@ -103,7 +113,7 @@
         // detail
         $('#detail').click(function () {
             layer.open({
-                content: 123
+                content: '这里将会显示合同详情'
             });
         })
     });
