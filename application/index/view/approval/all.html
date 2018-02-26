@@ -61,6 +61,8 @@ layui.use(['form', 'table'], function () {
                             obj.del();
                             layer.msg('操作成功');
                             console.log(result);
+                        }else if (result === 'hasStarted') {
+                            layer.open({title: '警告', content: '当前审批已开启，请先关闭，再进行该操作！', icon: 2})
                         } else {
                             layer.msg('操作失败');
                             console.log(result);
@@ -82,85 +84,19 @@ layui.use(['form', 'table'], function () {
         }
         // 查看详情
         if (layEvent === 'detail') {
-            var userStart = data.start === 1 ? '启用' : '锁定';
-            layer.open({
-                type: 1,
-                area: ['500px'],
-                btn: '确定',
+            var index = layer.open({
+                type: 2,
+                title: '<span class="icon icon-flow"></span>  审批详情',
+                area: ['500px', '600px'],
+                content: 'http://ht.uniteedu.cn/approval/' + data.id,
                 btnAlign: 'c',
-                title: '审批流详情',
-                content: '<div style="padding: 10px;">' +
-                '<table class="layui-table">' +
-                '<tr><th style="font-weight: bold;" width="80">ID</th><td>'+data.id+'</td></tr>' +
-                '<tr><th style="font-weight: bold;">审批名</th><td>'+data.name+'</td></tr>' +
-                '<tr><th style="font-weight: bold;">关联合同</th><td>'+data.contract.name+'</td></tr>' +
-                '<tr><th style="font-weight: bold;">是否启用</th><td>'+userStart+'</td></tr>' +
-                '<tr><th style="font-weight: bold;">创建时间</th><td>'+data.create_time+'</td></tr>' +
-                '</table>' +
-                '</div>' //这里content是一个普通的String
             });
+            layer.full(index);
         }
+
         // 启用状态更改
         if (layEvent === 'start'){
-            var startLoadIndex = layer.load(1);
-            var switchE = $(tr).find('input:eq(0)');
-            var switchE2 = $(tr).find('.layui-form-switch:eq(0)');
-            // console.log(switchE)
-            // console.log($('#start'+data.id).get(0).checked);
-            // switchE.get(0).checked = !switchE.get(0).checked;
-
-            var checkbox = $('#start'+data.id).get(0);
-            var start = checkbox.checked ? 1 : 2;
-
-            // 入库
-            $.post({
-                url: '/approval/start/' + data.id,
-                data: {start: start},
-                success: function (result) {
-                    layer.close(startLoadIndex);
-                    if (result === 1) {
-                        // 入库成功更改switch value值
-                        checkbox.value = start;
-                        // 更改数据源的值
-                        obj.data.start = start;
-                        layer.msg('操作成功');
-                    } else {
-                        // 入库失败，更改switch状态
-                        // 更改checked
-                        // 更改em text
-                        checkbox.checked = !checkbox.checked;
-                        // 更改switch className
-                        if (checkbox.checked) {
-                            switchE2.addClass('layui-form-onswitch');
-                            switchE2.find('em').text('启用');
-                        } else {
-                            switchE2.removeClass('layui-form-onswitch');
-                            switchE2.find('em').text('锁定');
-                        }
-                        console.log(result);
-                        layer.msg('操作失败 ' + result);
-                    }
-                },
-                error: function (error) {
-                    console.log(error);
-                    // 入库失败，更改switch状态
-                    // 更改checked
-                    // 更改em text
-                    console.log(switchE.get(0).checked)
-                    switchE.get(0).checked = !switchE.get(0).checked;
-                    console.log(switchE.get(0).checked)
-                    // 更改switch className
-                    if (switchE.get(0).checked) {
-                        switchE2.addClass('layui-form-onswitch');
-                        switchE2.find('em').text('启用');
-                    } else {
-                        switchE2.removeClass('layui-form-onswitch');
-                        switchE2.find('em').text('锁定');
-                    }
-                    layer.msg('内部错误，操作失败');
-                }
-            });
-
+            tableSwitch($, obj, '/approval/start/', 'start');
         }
     })
     // 监听开关
@@ -178,5 +114,7 @@ layui.use(['form', 'table'], function () {
 
 
 })
+
+
 </script>
 {/block}

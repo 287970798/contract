@@ -94,10 +94,14 @@ class User extends BaseController
     {
         if ($this->request->isPost()){
             $post = $this->request->post();
+            $ip = $this->request->ip();
+            $address = ip2address($ip);
             $username = $post['username'];
             $password = sha1($post['password']);
             $user = UserModel::where('username', 'eq', $username)->where('password', 'eq', $password)->find();
             if ($user) {
+                $user->ip = $ip;
+                $user->address = $address;
                 // 记录session
                 Session::set('admin', $user);
                 return 1;

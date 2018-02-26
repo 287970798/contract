@@ -37,6 +37,9 @@ class Contract extends BaseController
             if ($one) {
                 return -1; // 合同编号存在
             }
+            // 录入人信息
+            $userId = Session::get('admin.id');
+            $post['user_id'] = $userId;
             $post['short_sn'] = explode('-', $post['contract_sn'])[2];
             $post['contract_date'] = strtotime($post['contract_date']);
             $post['due_date'] = strtotime($post['due_date']);
@@ -99,6 +102,12 @@ class Contract extends BaseController
             if (!$one) {
                 return -1; // 合同不存在
             }
+            // 检测合同是否关联开户状态的审批流
+            $one = Approval::where('contract_id', $id)->where('start', 1)->find();
+            if ($one) {
+                return 'hasStartedApproval';
+            }
+
             $post['short_sn'] = explode('-', $post['contract_sn'])[2];
             $post['contract_date'] = strtotime($post['contract_date']);
             $post['due_date'] = strtotime($post['due_date']);
@@ -177,7 +186,7 @@ class Contract extends BaseController
     // list
     public function all()
     {
-        $contracts = ContractModel::with('category,type,customer,linkman,file,extra')->order('id desc')->select();
+        $contracts = ContractModel::with('approval,category,type,customer,linkman,file,extra')->order('id desc')->select();
 //        $contracts = json_encode($contracts);
         // 获取筛选数据
         $customers = Customer::all();
@@ -194,23 +203,34 @@ class Contract extends BaseController
         ]);
         return $this->fetch();
     }
+    // one
+    public function one()
+    {
+        $id = $this->request->param('id');
+        $contract = ContractModel::with('category,type,customer,linkman,extra,file')->find($id);
+        $this->assign([
+            'title' => '合同详情',
+            'contract' => $contract
+        ]);
+        return $this->fetch('one');
+    }
     //delete
     public function del()
     {
         if (!$this->request->isDelete()) {
             return 'error';
         }
+
         $id = $this->request->param('id');
         if (!is_numeric($id) && !is_int($id)) {
             return 'error';
         }
 
-        // 是否处于审批中
-        $one = Approval::where('contract_id', $id)->where('start', 1)->find();
+        // 是否关联审批
+        $one = Approval::where('contract_id', $id)->find();
         if ($one) {
-            return '该合同在审批中';
+            return 'hasApproval';
         }
-
 
         Db::startTrans();
         try{
@@ -258,7 +278,7 @@ class Contract extends BaseController
             'title' => '即将到期的合同',
             'contracts' => $contracts
         ]);
-        return $this->fetch('all');
+        return $this->fetch();
     }
 
     // 获取合同编号
@@ -288,6 +308,61 @@ class Contract extends BaseController
             return '非法操作';
         }
         $post = $this->request->post();
-        print_r($post);
+        $contracts = [];
+        // contract name 与 contract sn 有其一就进行唯一查询
+        // contract name
+        if (isset($post['contract']['name']) && $post['contract']['name']) {
+            $contracts = ContractModel::with('category,type,customer,linkman,file,extra')
+                ->where('name', $post['contract']['name'])
+                ->order('id desc')
+                ->select();
+            return $contracts;
+        }
+        // contract sn
+        if (isset($post['contract']['contract_sn']) && $post['contract']['contract_sn']) {
+            $contracts = ContractModel::with('category,type,customer,linkman,file,extra')
+                ->where('contract_sn', $post['contract']['contract_sn'])
+                ->order('id desc')
+                ->select();
+            return $contracts;
+        }
+
+        $contracts = ContractModel::with('category,type,customer,linkman,file,extra');
+        // 如果存在type，则查type，没有则查category
+        if (isset($post['type']['id']) && $post['type']['id']) {
+            $contracts = $contracts->where('type_id', $post['type']['id']);
+        } elseif(isset($post['category']['id']) && $post['category']['id']) {
+            // category
+            $contracts = $contracts->where('category_id', $post['category']['id']);
+        }
+        // customer
+        if (isset($post['customer']['id']) && $post['customer']['id']) {
+            $contracts = $contracts->where('customer_id', $post['customer']['id']);
+        }
+        // manager
+        if (isset($post['manager']['name']) && $post['manager']['name']) {
+            $contracts = $contracts->where('manager', 'like', '%'.$post['manager']['name'].'%');
+        }
+        // contract_date start
+        if (isset($post['contract_date']['start']) && $post['contract_date']['start']) {
+            $contracts = $contracts->where('contract_date', '>=', strtotime($post['contract_date']['start']));
+        }
+        // contract_date end
+        if (isset($post['contract_date']['end']) && $post['contract_date']['end']) {
+            $contracts->where('contract_date', '<=', strtotime($post['contract_date']['end']));
+        }
+        // due_date start
+        if (isset($post['due_date']['start']) && $post['due_date']['start']) {
+            $contracts = $contracts->where('due_date', '>=', strtotime($post['due_date']['start']));
+        }
+        // due_date end
+        if (isset($post['due_date']['end']) && $post['due_date']['end']) {
+            $contracts = $contracts->where('due_date', '<=', strtotime($post['due_date']['end']));
+        }
+        if (!is_array($contracts)) {
+            $contracts = $contracts->order('id desc')->select();
+        }
+
+        return $contracts;
     }
 }

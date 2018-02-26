@@ -85,7 +85,7 @@ class Approval extends BaseController
 
             // 验证该审批流状态，如果已进入审批，则不能修改
             if (ApprovalModel::get($id)->start == 1) {
-                return '当前审批为开启状态，不可修改';
+                return 'hasStarted';
             }
 
             $post = $this->request->post();
@@ -198,10 +198,16 @@ class Approval extends BaseController
         if (!$this->request->isAjax() && !$this->request->isDelete()) {
             return -1;
         }
-        // 验证审批状态，开启的审批不可删除
-        // todo...
 
         $id = $this->request->param('id');
+
+        // 验证审批状态，开启的审批不可删除
+        // todo...
+        $one = ApprovalModel::get($id);
+        if ($one->start == 1) {
+            return 'hasStarted';
+        }
+
         Db::startTrans();
         try{
             $result = ApprovalModel::destroy($id);

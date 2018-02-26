@@ -13,7 +13,7 @@
                         <table class="layui-table">
                             {volist name="contracts.new" id="contract" empty="暂时没有数据"}
                             <tr>
-                                <td>{$contract.name}</td>
+                                <td><a href="javascript:;" class="contract-item" data-id="{$contract.id}">{$contract.name}</a></td>
                                 <td width="160">{$contract.create_time}</td>
                             </tr>
                             {/volist}
@@ -23,7 +23,7 @@
                         <table class="layui-table">
                             {volist name="contracts.expiring" id="contract" empty="暂时没有数据"}
                             <tr>
-                                <td>{$contract.name}</td>
+                                <td><a href="javascript:;" class="contract-item" data-id="{$contract.id}">{$contract.name}</a></td>
                                 <td width="160">
                                     <span style="color: #FFB800;">{$contract.days}天后到期</span>
                                 </td>
@@ -35,7 +35,7 @@
                         <table class="layui-table">
                             {volist name="contracts.overdue" id="contract" empty="暂时没有数据"}
                             <tr>
-                                <td>{$contract.name}</td>
+                                <td><a href="javascript:;" class="contract-item" data-id="{$contract.id}">{$contract.name}</a></td>
                                 <td width="160">
                                     <span style="color: #FF5722;">已过期{$contract.days|abs}天</span>
                                 </td>
@@ -54,6 +54,7 @@
                 </ul>
                 <div class="layui-tab-content" style="height: 216px;">
                     <div class="layui-tab-item layui-show">
+                        {if $approvals.beSponsor->toArray()}
                         <table class="layui-table">
                             <thead>
                             <tr><th>审批名</th><th>关联合同</th><th>当前审批人</th><th>审批进度</th></tr>
@@ -61,30 +62,40 @@
                             <tbody>
                             {volist name="approvals.beSponsor" id="approval" empty="暂时没有数据"}
                             <tr>
-                                <td>{$approval.name}</td>
+                                <td><a href="javascript:;" class="approval-item" data-id="{$approval.id}">{$approval.name}</a></td>
                                 <td>{$approval.contract.name}</td>
                                 <td>{$approval.currentNode.user.name}</td>
-                                <td width="100" style="font-weight: bold;">{:ceil($approval.process/$approval.total_nodes*100)}%</td>
+                                <td width="100" style="font-weight: bold;">
+                                    {if $approval.process/$approval.total_nodes*100 > 100}
+                                    100%
+                                    {else /}
+                                    {:ceil($approval.process/$approval.total_nodes*100)}%
+                                    {/if}
+                                </td>
                             </tr>
                             {/volist}
                             </tbody>
                         </table>
+                        {else /} 暂时没有数据
+                        {/if}
                     </div>
                     <div class="layui-tab-item">
+                        {if $approvals.beApproval->toArray()}
                         <table class="layui-table">
                             <thead>
                             <tr><th>审批名</th><th>关联合同</th><th>更新时间</th></tr>
                             </thead>
                             <tbody>
-                            {volist name="approvals.beSponsor" id="approval" empty="暂时没有数据"}
+                            {volist name="approvals.beApproval" id="approval" empty="暂时没有数据"}
                             <tr>
-                                <td>{$approval.name}</td>
+                                <td><a href="javascript:;" class="approval-item" data-id="{$approval.id}">{$approval.name}</a></td>
                                 <td>{$approval.contract.name}</td>
                                 <td>{$approval.update_time}</td>
                             </tr>
                             {/volist}
                             </tbody>
                         </table>
+                        {/if}
                     </div>
                 </div>
             </div>
@@ -96,7 +107,7 @@
                 <ul class="layui-tab-title">
                     <li class="layui-this">我添加的客户</li>
                 </ul>
-                <div class="layui-tab-content" style="height: 100px;">
+                <div class="layui-tab-content" style="height: 216px;">
                     <div class="layui-tab-item layui-show">
                         <table class="layui-table">
                             {volist name="customers" id="customer" empty="暂时没有数据"}
@@ -115,7 +126,7 @@
                 <ul class="layui-tab-title">
                     <li class="layui-this">我添加的联系人</li>
                 </ul>
-                <div class="layui-tab-content" style="height: 100px;">
+                <div class="layui-tab-content" style="height: 216px;">
                     <div class="layui-tab-item layui-show">
                         <table class="layui-table">
                             {volist name="linkmans" id="linkman" empty="暂时没有数据"}
@@ -149,9 +160,9 @@
                     // content += '<div class="layui-fluid">';
                     for (var i = 0; i < result.length; i++) {
                         content += '  <div class="layui-row">\n' +
-                                '<div class="layui-col">'+
+                                '<a href="javascript:;" data-id='+result[i]["id"]+' class="layui-col contract-item">'+
                                     result[i]['name'] + ' ' + result[i]['days'] +'天后到期' +
-                                '</div>' +
+                                '</a>' +
                                     '  </div>'
                     }
                     // content += '</div>';
@@ -167,9 +178,41 @@
                             location.href = '/contract/expiring';
                         }
                     });
+                    $('.contract-item').click(function () {
+                        openContract($(this).data('id'));
+                    });
                 }
             }
         });
+
+        $('.approval-item').click(function () {
+            openApproval($(this).data('id'));
+        });
+        // 打开合同详情
+        var openContract = function (id) {
+            layer.open({
+                type: 2,
+                title: '<span class="icon icon-contract"></span>  合同详情',
+                area: ['500px', '600px'],
+                content: '/contract/one/'+id,
+                btn: '确定',
+                btnAlign: 'c'
+            });
+        }
+        // 打开审批详情
+        var openApproval = function (id) {
+            var index = layer.open({
+                type: 2,
+                title: '<span class="icon icon-flow"></span>  审批详情',
+                area: ['500px', '600px'],
+                content: 'http://ht.uniteedu.cn/approval/' + id,
+                btn: '确定',
+                btnAlign: 'c'
+            });
+            layer.full(index);
+        }
+
+
     });
 </script>
 {/block}

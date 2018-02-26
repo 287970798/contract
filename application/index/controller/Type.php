@@ -10,6 +10,7 @@ namespace app\index\controller;
 
 use app\index\model\Type as TypeModel;
 use app\index\model\Category;
+use app\index\model\Contract;
 
 class Type extends BaseController
 {
@@ -95,6 +96,10 @@ class Type extends BaseController
 
         // 验证当前分类下是否存在合同，如果存在，不允许删除。
         // TODO...
+        $one = Contract::where('type_id', $id)->find();
+        if ($one) {
+            return 'hasContracts';
+        }
 
         $result = TypeModel::destroy($id);
         return $result;

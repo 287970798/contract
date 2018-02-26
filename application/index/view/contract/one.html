@@ -1,0 +1,90 @@
+{extend name="common/dialog" /}
+{block name="css"}
+{__block__}
+<style>
+.date{
+    font-size: 12px; margin-left: 20px;
+}
+</style>
+{/block}
+{block name="content"}
+<div class="layui-container">
+    <table class="layui-table">
+        <colgroup>
+            <col width="120">
+            <col>
+        </colgroup>
+        <thead>
+        <tr>
+            <th colspan="2" style="text-align: center">{$contract.name}</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <th>合同ID</th>
+            <td>{$contract.id}</td>
+        </tr>
+        <tr>
+            <th>合同类型</th>
+            <td>{$contract.type.name}</td>
+        </tr>
+        <tr>
+            <th>合同编号</th>
+            <td>{$contract.contract_sn}</td>
+        </tr>
+        <tr>
+            <th>客户名</th>
+            <td>{$contract.customer.name}<br>联系人：{$contract.linkman.name} {$contract.linkman.phone}</td>
+        </tr>
+        <tr>
+            <th>合同负责人</th>
+            <td>{$contract.manager} {$contract.department}</td>
+        </tr>
+        {volist name="contract.extra" id="item"}
+        <tr>
+            <th>{$item.title}</th>
+            <td>{$item.content}</td>
+        </tr>
+        {/volist}
+        <tr>
+            <th>签约日</th>
+            <td id="contract_date">{$contract.contract_date}</td>
+        </tr>
+        <tr>
+            <th>到期日</th>
+            <td id="due_date">{$contract.due_date}</td>
+        </tr>
+        {if $contract.file}
+        <tr>
+            <th>合同附件</th>
+            <td id="file">
+                <a type="button" href="/uploads/{$contract.file.src}">
+                    <i class="layui-icon">&#xe67c;</i>
+                    {$contract.file.title}
+                </a>
+            </td>
+        </tr>
+        {/if}
+        </tbody>
+    </table>
+</div>
+{/block}
+
+{block name="js"}
+{__block__}
+<script>
+    layui.use(['table', 'util'], function () {
+        var $ = layui.jquery;
+        var table = layui.table;
+        var util = layui.util;
+
+        // 格式化日期
+        var contractDate = util.toDateString({$contract.contract_date} * 1000, 'yyyy-MM-dd');
+        var dueDate = util.toDateString({$contract.due_date} * 1000, 'yyyy-MM-dd');
+        $('#contract_date').html(contractDate);
+        $('#due_date').html(dueDate);
+
+
+    });
+</script>
+{/block}

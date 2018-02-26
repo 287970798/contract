@@ -86,24 +86,24 @@
                 <div class="layui-inline filter-item">
                     <label class="layui-form-label">签约日</label>
                     <div class="layui-input-inline">
-                        <input type="text" name="contract_date[start]" required lay-verify="required" autocomplete="off"
+                        <input type="text" name="contract_date[start]" autocomplete="off"
                                class="layui-input" id="contract_date_start">
                     </div>
                     -
                     <div class="layui-input-inline">
-                        <input type="text" name="contract_date[end]" required lay-verify="required" autocomplete="off"
+                        <input type="text" name="contract_date[end]" autocomplete="off"
                                class="layui-input" id="contract_date_end">
                     </div>
                 </div>
                 <div class="layui-inline filter-item">
                     <label class="layui-form-label">到期日</label>
                     <div class="layui-input-inline">
-                        <input type="text" name="due_date[start]" required lay-verify="required" autocomplete="off"
+                        <input type="text" name="due_date[start]" autocomplete="off"
                                class="layui-input" id="due_date_start">
                     </div>
                     -
                     <div class="layui-input-inline">
-                        <input type="text" name="due_date[end]" required lay-verify="required" autocomplete="off"
+                        <input type="text" name="due_date[end]" autocomplete="off"
                                class="layui-input" id="due_date_end">
                     </div>
                 </div>
@@ -125,6 +125,31 @@
     {{#  if(d.auth > 2){ }}
     <a class="layui-btn layui-btn-xs" lay-event="check">审核</a>
     {{#  } }}
+</script>
+
+{// 审批状态 }
+<script type="text/html" id="nameTpl">
+    {{d.name}}
+    {{# if(d.approval) { }}
+        {{#
+            var iconColor='';
+            if(d.approval.start==2) {
+                d.status = '锁定';
+                iconColor='#393D49'
+            } else {
+                var process = Math.floor(d.approval.process / d.approval.total_nodes * 100);
+                if(process>100) process=100;
+                process += '%';
+                d.status = '审批进度 ' + process;
+                iconColor='#FFB800';
+            }
+            if(d.approval.status==2) {d.status+=' <span class="layui-badge layui-bg-orange">审核通过</span>';iconColor='#5FB878'}
+            if(d.approval.status==3) {d.status+=' <span class="layui-badge">审核驳回</span>';iconColor='#FF5722'}
+
+    }}
+
+        <span class="icon icon-flow hasApproval" style="color:{{iconColor}}" data-name="{{d.approval.name}}" data-status='{{d.status}}'></span>
+    {{# } }}
 </script>
 
 {/block}
@@ -163,28 +188,75 @@
                 moreBtn.html('高级');
             }
         });
+        // 使用contract name or sn筛选时， 禁用其他条件
+        var changeFn = function (data) {
+            if (data.value) {
+                $('.filter-item select, .filter-item input').not(data.elem).attr("disabled","disabled");
+                layer.msg('其他条件已禁用');
+            } else {
+                $('.filter-item select, .filter-item input').not(data.elem).removeAttr("disabled");
+                layer.msg('其他条件已启用');
+            }
+            form.render('select');
+        }
+        form.on('select(name)', changeFn);
+        form.on('select(contract_sn)', changeFn);
+
         // filter submit
         form.on('submit(search)', function (data) {
-            console.log(data.field);
-            layer.msg('开发中');
+            // 判断筛选条件是否为空
+            var selectHasVal = false;
+            $('.filter-item select').each(function () {
+                if ($(this).val()) {
+                    selectHasVal = true;
+                    return;
+                }
+            })
+            if (!selectHasVal) {
+                $('.filter-item input').each(function () {
+                    if ($(this).val()) {
+                        selectHasVal = true;
+                        return;
+                    }
+                })
+            }
+            if (!selectHasVal) {
+                layer.msg('没有设置筛选条件');
+                return false;
+            }
+            // 发送筛选请求
+            var fileterIndex = layer.load(1);
             $.post({
                 url: '/contract/search',
                 data: data.field,
                 success: function (result) {
-                    console.log(result)
+                    layer.close(fileterIndex);
+                    layer.msg('筛选完成');
+                    tableIns.reload({
+                        data: result,
+                        page: {
+                            curr: 1
+                        }
+                    });
                 },
                 fail: function (error) {
+                    layer.close(fileterIndex);
                     console.log(error)
+                    layer.open({
+                        content: '网络错误或服务器内部错误，请重试'
+                    })
                 }
             })
             return false;
         });
 
-        table.render({
+        // 渲染表格
+        var tableIns = table.render({
             elem: '#contract'
             , height: 'full-270'
             , data: {$contracts}
             , page: true //开启分页
+            , limit: 15
             , cols: [[ //表头
                 {checkbox: true},
                 {field: 'id', title: 'ID', width: 100, sort: true}
@@ -201,6 +273,7 @@
                 , {title: '操作', fixed: 'right', width: 150, align: 'center', toolbar: '#operateBar'}
             ]]
         });
+        // 表格工具条操作
         table.on('tool(contract)', function (obj) { //注：tool是工具条事件名，test是table原始容器的属性 lay-filter="对应的值"
             var data = obj.data; //获得当前行数据
             var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
@@ -219,6 +292,8 @@
                                 obj.del();
                                 layer.msg('操作成功');
                                 console.log(result);
+                            } else if (result === 'hasApproval') {
+                                layer.open({title: '警告', content: '当前合同已关联审批，请先删除该合同的关联审批，再进行该操作！', icon: 2})
                             } else {
                                 layer.msg('操作失败 ' + result);
                                 console.log(result);
@@ -277,23 +352,20 @@
                     btn: '确定',
                     btnAlign: 'c',
                     title: '合同详情',
-                    content: content//这里content是一个普通的String
+                    content: content //这里content是一个普通的String
                 });
-                layer.full(index);
             }
         })
-        // 监听开关
-        // table.on('switch(status)', function(data){
-        //     data.status = 5;
-        //     console.log(data)
-        //     console.log($(data.elem).val())
-        //     if (data.elem.checked) {
-        //         $(data.elem).val(1);
-        //     } else {
-        //         $(data.elem).val(2);
-        //     }
-        //     // console.log($(data.elem).val());
-        // });
+
+        // tips
+        var tipsIndex = null;
+        $('.hasApproval').hover(function () {
+            var that = this;
+            var msg = '已关联审批<br><b>'+$(that).data('name')+'</b><br>'+$(that).data('status');
+            tipsIndex = layer.tips(msg, that,{tips: [2,'#5FB878'],time: 0});
+        },function(){
+            layer.close(tipsIndex);
+        })
     })
 </script>
 {/block}

@@ -53,6 +53,8 @@
                                 obj.del();
                                 layer.msg('操作成功');
                                 console.log(result);
+                            }else if (result === 'hasContracts') {
+                                layer.open({title: '警告', content: '当前类别下存在合同，请先删除该类别下的合同，再进行该操作！', icon: 2})
                             } else {
                                 layer.msg('操作失败');
                                 console.log(result);

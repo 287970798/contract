@@ -75,7 +75,7 @@
         <div class="layui-form-item">
             <div class="layui-input-block">
                 <button class="layui-btn" lay-submit lay-filter="formDemo">立即提交</button>
-                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                <a onclick="history.back()" class="layui-btn layui-btn-primary">返回</a>
             </div>
         </div>
     </form>
@@ -217,6 +217,15 @@
                     if (result === 1) {
                         layer.msg('审批流程修改成功', function () {
                             location.href = '/approval/all';
+                        });
+                    } else if (result === 'hasStarted') {
+                        layer.open({
+                            title: '警告',
+                            content: '修改失败。当前审批已开启，请先关闭，再进行该操作！',
+                            icon: 2,
+                            yes: function () {
+                                location.href='/approval/all';
+                            }
                         });
                     } else {
                         layer.open({content: '修改失败！', icon: 2});

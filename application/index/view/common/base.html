@@ -67,6 +67,9 @@
                             <span class="icon icon-profile"></span>
                             <span class="menu">基本资料</span>
                         </a>
+                        <a href="">
+                            <span class="menu" id="ip">{:mb_substr($Think.session.admin.address,2,6,'utf-8')}</span>
+                        </a>
                     </dd>
                 </dl>
             </li>
@@ -200,7 +203,79 @@
 <script>
     //JavaScript代码区域
     layui.use('element', function () {
+        var $ = layui.jquery;
         var element = layui.element;
+
+        //notice
+        var noticeFun = function () {
+            $.get({
+                url: '/notice/pull',
+                success: function (result) {
+                    console.log(result);
+                    if (result.count >= 1) {
+                        // 关闭嗅探
+                        clearInterval(noticeSniffer);
+                        var noticeIds = '';
+                        var content = '';
+                        for (var i in result.notices) {
+                            var item = result.notices[i];
+                            noticeIds += ',' + item.id;
+                            if (item.approval) {
+                                content += '<div class="layui-row">审批 '
+                                    + '<a href="javascript:;" class="layui-col notice-item" data-id="' + item.approval.id + '">' + item.approval.name + '</a> '
+                                    + item.note
+                                    + '</div>';
+                            }
+                        }
+                        noticeIds = noticeIds.replace(/^,*/, '');
+                        // 确定与关闭按钮回调
+                        var btnFn = function (index, layero) {
+                            $.ajax({
+                                type: 'DELETE',
+                                url: '/notice/del/'+noticeIds,
+                                success: function (result) {
+                                    console.log(result)
+                                },
+                                fail: function (error) {
+                                    console.log(error)
+                                }
+                            });
+                            // 继续嗅探新通知
+                            noticeSniffer = setInterval(noticeFun,5000);
+                            layer.close(index);
+                        }
+                        layer.open({
+                            type: 0,
+                            shade: 0,
+                            offset: 'rb',
+                            anim: 2,
+                            title: '您有新通知',
+                            content: content,
+                            btn: '知道了',
+                            btnAlign: 'c',
+                            yes: btnFn,
+                            cancel: btnFn
+                        });
+                        $('.notice-item').click(function () {
+                            openNotice($(this).data('id'));
+                        });
+                    }
+                }
+            })
+        }
+        var noticeSniffer = setInterval(noticeFun,5000);
+        // 打开审批详情
+        var openNotice = function (id) {
+            var index = layer.open({
+                type: 2,
+                title: '<span class="icon icon-flow"></span>  审批详情',
+                area: ['500px', '600px'],
+                content: 'http://ht.uniteedu.cn/approval/' + id,
+                btn: '确定',
+                btnAlign: 'c'
+            });
+            layer.full(index);
+        }
     });
 </script>
 {/block}

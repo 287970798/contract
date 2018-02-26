@@ -113,7 +113,12 @@
         // detail
         $('#detail').click(function () {
             layer.open({
-                content: '这里将会显示合同详情'
+                type: 2,
+                title: '<span class="icon icon-contract"></span>  合同详情',
+                area: ['500px', '600px'],
+                content: '/contract/one/{$approval.contract.id}',
+                btn: '确定',
+                btnAlign: 'c'
             });
         })
     });

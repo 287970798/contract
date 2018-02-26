@@ -32,3 +32,13 @@ function httpCurl($url, $type = 'get', $res = '', $arr = '')
     }
     return $output;
 }
+
+function ip2address($ip) {
+    $res = httpCurl('http://ip.taobao.com/service/getIpInfo.php?ip='.$ip);
+    $ipObj = json_decode($res);
+    $address = '';
+    if ($ipObj->code === 0) {
+        $address = $ipObj->data->country . $ipObj->data->region . $ipObj->data->city . $ipObj->data->isp;
+    }
+    return $address;
+}

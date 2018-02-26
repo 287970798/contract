@@ -63,14 +63,21 @@ class Index extends BaseController
             ->where('start', 1)
             ->limit(5)->select();
         // 用户审批
-        $beApporval = Approval::with('contract')
-            ->where('current_node_id', $user['id'])
+        $nodes = ApprovalNode::field('id')->where('user_id', $user['id'])->select();
+        $ids = '';
+        foreach ($nodes as $node) {
+            $ids .= ','.$node->id;
+        }
+        $ids = trim($ids, ',');
+        $beApproval = Approval::with('contract')
+            ->where('current_node_id', 'in', $ids)
+            ->where('status', 1)
             ->limit(5)
             ->order('update_time desc')
             ->select();
         return [
             'beSponsor' => $beSponsor,
-            'beApproval' => $beApporval
+            'beApproval' => $beApproval
         ];
     }
 

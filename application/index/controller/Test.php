@@ -4,6 +4,8 @@
 namespace app\index\controller;
 
 
+use think\Cache;
+
 class Test
 {
     /**
@@ -20,5 +22,15 @@ class Test
         ];
         $res = httpCurl($url, 'post', '', $arr);
         return $res;
+    }
+
+    public function cache()
+    {
+        $user_id =5;
+        $data = [
+            'id'=>1
+        ];
+        Cache::set('approve',$data);
+        dump(Cache::get('approve'));
     }
 }

@@ -8,6 +8,7 @@ use app\index\model\ApprovalNode;
 use think\Db;
 use think\Exception;
 use app\index\model\Approval;
+use think\Session;
 
 class Node extends BaseController
 {
@@ -68,7 +69,7 @@ class Node extends BaseController
         if (!$this->request->isAjax() || !$this->request->isPost()) {
             return '非法操作';
         }
-
+        $userId = Session::get('admin.id');
         $post = $this->request->post();
         $approvalId = $post['approval_id'];
         unset($post['approval_id']);
@@ -82,7 +83,8 @@ class Node extends BaseController
             }
             $result = $nodeModel->isUpdate(true)->allowField(true)->save($post);
             // 进度
-            Approval::where('id', $approvalId)->setInc('process');
+            $approval = Approval::get($approvalId);
+            $approval->setInc('process');
 //            Db::table('approval')->where('id', $approvalId)->setInc('process');
 
             if ($post['status'] == 1) {
@@ -105,12 +107,15 @@ class Node extends BaseController
                         'id' => $approvalId,
                         'status' => 2   // 审批流通过结束
                     ]);
+                    // 添加审批通知
+                    Notice::add(['model'=>'ApprovalNotice', 'user_id'=>$approval->user_id, 'approval_id'=>$approvalId, 'note'=>'已通过']);
                 }
             } elseif ($post['status'] == 2) {
                 Approval::update([
                     'id' => $approvalId,
                     'status' => 3   // 审批流驳回结束
                 ]);
+                Notice::add(['model'=>'ApprovalNotice', 'user_id'=>$approval->user_id, 'approval_id'=>$approvalId, 'note'=>'已驳回']);
             }
             Db::commit();
         } catch (Exception $e) {

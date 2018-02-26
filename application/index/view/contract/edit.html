@@ -334,13 +334,16 @@
                         });
                     } else if (result === -1) {
                         layer.open({content: '修改失败！合同不存在！', icon: 2});
+                    } else if (result === 'hasStartedApproval') {
+                        layer.open({title: '警告', content: '当前合同关联的审批处于开启状态，请先锁定关联审批，再进行该操作！', icon: 2})
                     } else {
-                        console.log(result);
+                        layer.msg('修改失败');
+                        console.log(result)
                     }
                 },
                 error: function (error) {
                     layer.close(index1);
-                    layer.msg('内部错误，修改失败', {icon: 2});
+                    layer.msg('网络或服务器内部错误，修改失败', {icon: 2});
                     console.log(error);
                 }
             });

@@ -45,6 +45,7 @@ Route::rule('contract/edit/:id', 'contract/edit');
 Route::rule('contract/del/:id', 'contract/del');
 Route::rule('contract/getContractSn/:category_id/:type_id', 'contract/getContractSn');
 Route::rule('contract/search', 'contract/search');
+Route::rule('contract/one/:id', 'contract/one');
 
 // contract extra
 Route::rule('contractExtra/del/:id', 'contractExtra/del');
@@ -65,5 +66,10 @@ Route::rule('approval/start/:id', 'approval/setStart');
 Route::rule('node/approval/:id', 'node/approval');
 Route::rule('node/check$', 'node/check');
 
+// notice
+Route::rule('notice/pull', 'notice/pull');
+Route::rule('notice/del/:ids', 'notice/del');
+
 // test 测试curl发送邮件
 Route::rule('test/mail', 'test/mail');
+Route::rule('test/cache', 'test/cache');
