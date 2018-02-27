@@ -95,6 +95,7 @@
                             {/volist}
                             </tbody>
                         </table>
+                        {else /}暂时没有数据
                         {/if}
                     </div>
                 </div>
@@ -168,6 +169,7 @@
                     // content += '</div>';
                     layer.open({
                         type: 0,
+                        shade: 0,
                         offset: 'rb',
                         anim: 2,
                         title: '您有' + result.length + '个合同即将到期',

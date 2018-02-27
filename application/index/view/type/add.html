@@ -3,14 +3,14 @@
 <div class="layui-container">
     <form class="layui-form layui-form-pane" action="">
         <div class="layui-form-item">
-            <label class="layui-form-label">合同类别名称</label>
+            <label class="layui-form-label">类别名称</label>
             <div class="layui-input-block">
                 <input type="text" name="name" required lay-verify="required" placeholder="请填写合同类别名称" autocomplete="off"
                        class="layui-input">
             </div>
         </div>
         <div class="layui-form-item">
-            <label class="layui-form-label">所属合同分类</label>
+            <label class="layui-form-label">所属分类</label>
             <div class="layui-input-block">
                 <select name="category_id" required lay-verify="required" lay-search lay-filter="category">
                     <option value>请输入选择</option>
@@ -36,7 +36,7 @@
         <div class="layui-form-item">
             <div class="layui-input-block">
                 <button class="layui-btn" lay-submit lay-filter="formDemo">立即提交</button>
-                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                <button type="button" class="layui-btn layui-btn-primary" onclick="location.href='/type/all'">返回</button>
             </div>
         </div>
     </form>

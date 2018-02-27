@@ -44,7 +44,7 @@
         <!-- 头部区域（可配合layui已有的水平导航） -->
         <ul class="layui-nav layui-layout-left">
             <li class="layui-nav-item"><a href="/">控制台</a></li>
-            <li class="layui-nav-item">
+            <li class="layui-nav-item layui-hide">
                 <a href="javascript:;">系统设置</a>
                 <dl class="layui-nav-child">
                     <dd><a href="">基本设置</a></dd>
@@ -67,8 +67,12 @@
                             <span class="icon icon-profile"></span>
                             <span class="menu">基本资料</span>
                         </a>
-                        <a href="">
-                            <span class="menu" id="ip">{:mb_substr($Think.session.admin.address,2,6,'utf-8')}</span>
+                    </dd>
+                    <dd>
+                        <a href="/user/edit/{$Think.session.admin.id}">
+                            <a href="javascript:;">
+                                <span class="menu" id="ip">{:mb_substr($Think.session.admin.address,2,6,'utf-8')}</span>
+                            </a>
                         </a>
                     </dd>
                 </dl>
@@ -84,7 +88,7 @@
         <div class="layui-side-scroll">
             <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
             <ul class="layui-nav layui-nav-tree" lay-filter="test">
-                <li class="layui-nav-item layui-nav-itemed">
+                <li class="layui-nav-item {if $Request.controller=='Contract' && in_array($Request.action, ['add','all','expiring'])}layui-nav-itemed{/if}">
                     <a class="" href="javascript:;">
                         <span class="icon icon-contract"></span>
                         <span class="menu">合同</span>
@@ -95,7 +99,7 @@
                         <dd><a href="/contract/expiring">即将到期</a></dd>
                     </dl>
                 </li>
-                <li class="layui-nav-item">
+                <li class="layui-nav-item {if in_array($Request.controller, ['Node', 'Approval'])}layui-nav-itemed{/if}">
                     <a href="javascript:;">
                         <span class="icon icon-flow"></span>
                         <span class="menu">审批</span>
@@ -108,7 +112,7 @@
                         <dd><a href="/approval/add">新建审批</a></dd>
                     </dl>
                 </li>
-                <li class="layui-nav-item">
+                <li class="layui-nav-item {if in_array($Request.controller, ['Customer', 'Linkman'])}layui-nav-itemed{/if}">
                     <a href="javascript:;">
                         <span class="icon icon-customer"></span>
                         <span class="menu">客户</span>
@@ -120,7 +124,7 @@
                         <dd><a href="/linkman/add">新增联系人</a></dd>
                     </dl>
                 </li>
-                <li class="layui-nav-item">
+                <li class="layui-nav-item {if in_array($Request.controller, ['User'])}layui-nav-itemed{/if}">
                     <a href="javascript:;">
                         <span class="icon icon-user"></span>
                         <span class="menu">用户</span>
@@ -130,7 +134,7 @@
                         <dd><a href="/user/add">新增用户</a></dd>
                     </dl>
                 </li>
-                <li class="layui-nav-item">
+                <li class="layui-nav-item {if in_array($Request.controller, ['Type', 'Category'])}layui-nav-itemed{/if}">
                     <a href="javascript:;">
                         <span class="icon icon-setting" style="font-size: 19px;"></span>
                         <span class="menu">设置</span>
@@ -142,14 +146,14 @@
                         <dd><a href="/type/add">新增合同类型</a></dd>
                     </dl>
                 </li>
-                <li class="layui-nav-item">
+                <li class="layui-nav-item {if $Request.controller=='Log'}layui-nav-itemed{/if}">
                     <a href="javascript:;">
                         <span class="icon icon-log"></span>
                         <span class="menu">日志</span>
                     </a>
                     <dl class="layui-nav-child">
-                        <dd><a href="javascript:;">合同修改记录</a></dd>
-                        <dd><a href="javascript:;">用户登录记录</a></dd>
+                        <dd><a href="/log/contract">合同修改记录</a></dd>
+                        <dd><a href="/log/login">用户登录记录</a></dd>
                     </dl>
                 </li>
                 <li class="layui-nav-item layui-hide"><a href="">上传</a></li>
@@ -249,7 +253,7 @@
                             shade: 0,
                             offset: 'rb',
                             anim: 2,
-                            title: '您有新通知',
+                            title: '<span class="layui-icon">&#xe645;</span> 您有新通知',
                             content: content,
                             btn: '知道了',
                             btnAlign: 'c',

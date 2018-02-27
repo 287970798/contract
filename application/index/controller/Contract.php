@@ -70,6 +70,15 @@ class Contract extends BaseController
                     $contractFileModel = new ContractFile();
                     $contractFileModel->save($file);
                 }
+                // 记录修改日志
+                Log::add([
+                    'model'=>'ContractLog',
+                    'user_id'=>$userId,
+                    'contract_id'=>$contract->id,
+                    'ip' => $this->request->ip(),
+                    'location' => ip2address($this->request->ip()),
+                    'note'=>'创建了新合同'
+                ]);
                 // 提交事务
                 Db::commit();
                 return $result;
@@ -154,6 +163,14 @@ class Contract extends BaseController
                         $contractFileModel->isUpdate(false)->save($file);
                     }
                 }
+                Log::add([
+                    'model'=>'ContractLog',
+                    'user_id'=>Session::get('admin.id'),
+                    'contract_id'=>$contract->id,
+                    'ip' => $this->request->ip(),
+                    'location' => ip2address($this->request->ip()),
+                    'note'=>'修改了合同'
+                ]);
                 // 提交事务
                 Db::commit();
                 return $result;
@@ -249,6 +266,13 @@ class Contract extends BaseController
                 }
             }
             $result = ContractModel::destroy($id);
+            Log::add([
+                'model'=>'ContractLog',
+                'user_id'=>Session::get('admin.id'),
+                'contract_id'=>$id,
+                'ip' => $this->request->ip(),
+                'location' => ip2address($this->request->ip()),
+                'note'=>'删除了合同']);
             // 提交事务
             Db::commit();
             return $result;

@@ -9,7 +9,10 @@
     {include file="common/css"}
     <style>
         body{
-            background: url("__STATIC__/images/bg@login.jpg") center 20%;
+            background: url("__STATIC__/images/bg@login{:mt_rand(1,2)}.jpg") center center no-repeat;
+            -webkit-background-size: 100%;
+            background-size: 100%;
+            background-attachment: fixed;
         }
         .login {
             position: relative;

@@ -104,6 +104,7 @@ class User extends BaseController
                 $user->address = $address;
                 // 记录session
                 Session::set('admin', $user);
+                Log::add(['model'=>'LoginLog', 'user_id'=>$user->id, 'ip'=>$ip, 'location'=>$address]);
                 return 1;
             } else {
                 return 2;

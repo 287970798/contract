@@ -1,0 +1,29 @@
+{extend name="common/base"}
+{block name="content"}
+<table id="log" lay-filter="log"></table>
+{/block}
+
+{block name="js"}
+{__block__}
+<script>
+    layui.use(['form', 'table'], function () {
+        var $ = layui.jquery;
+        var table = layui.table;
+        var form = layui.form;
+        table.render({
+            elem: '#log'
+            ,height: 'full-220'
+            ,data: {$logs}
+            ,page: true //开启分页
+            ,cols: [[ //表头
+                {checkbox: true},
+                {title: '序号', width: 100, templet: '<div>{{d.LAY_INDEX}}</div>', sort: true}
+                ,{field: 'user_id', title: '用户', templet: '<div>{{d.user.name}}</div>', sort: true}
+                ,{field: 'location', title: '登录地址',sort: true}
+                ,{field: 'ip', title: '登录IP',sort: true}
+                ,{field: 'create_time', title: '时间',sort: true}
+            ]]
+        });
+    })
+</script>
+{/block}

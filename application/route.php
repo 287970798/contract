@@ -70,6 +70,9 @@ Route::rule('node/check$', 'node/check');
 Route::rule('notice/pull', 'notice/pull');
 Route::rule('notice/del/:ids', 'notice/del');
 
+// log
+Route::rule('log/:type$', 'log/show');
+
 // test 测试curl发送邮件
 Route::rule('test/mail', 'test/mail');
 Route::rule('test/cache', 'test/cache');

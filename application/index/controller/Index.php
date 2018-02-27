@@ -40,7 +40,7 @@ class Index extends BaseController
 
         $expiring = $overdue = [];
         foreach ($expire as $item) {
-            $days = ceil(($item['due_date'] - time()) / (3600 * 24));
+            $days = ceil(($item['due_date'] - strtotime(date('Y-m-d', time()))) / (3600 * 24));
             $item['days'] = $days;
             if ($days >= 0) {
                 $expiring[] = $item;
