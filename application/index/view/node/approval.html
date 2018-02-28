@@ -71,21 +71,14 @@
             }
             // 查看详情
             if (layEvent === 'detail') {
-                layer.open({
-                    type: 1,
-                    area: ['500px'],
+                var index = layer.open({
+                    type: 2,
+                    area: ['500px', '600px'],
+                    content: 'http://ht.uniteedu.cn/approval/' + data.approval_id,
                     btn: '确定',
-                    btnAlign: 'c',
-                    title: '客户详情',
-                    content: '<div style="padding: 10px;">' +
-                    '<table class="layui-table">' +
-                    '<tr><th style="font-weight: bold;" width="80">ID</th><td>'+data.id+'</td></tr>' +
-                    '<tr><th style="font-weight: bold;">客户名称</th><td>'+data.name+'</td></tr>' +
-                    '<tr><th style="font-weight: bold;">备注</th><td>'+data.note+'</td></tr>' +
-                    '<tr><th style="font-weight: bold;">创建时间</th><td>'+data.create_time+'</td></tr>' +
-                    '</table>' +
-                    '</div>' //这里content是一个普通的String
+                    btnAlign: 'c'
                 });
+                layer.full(index);
             }
             // 审核
             if (layEvent === 'check') {

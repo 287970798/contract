@@ -9,7 +9,7 @@
                        class="layui-input">
             </div>
         </div>
-        <div class="layui-form-item">
+        <div class="layui-form-item" id="contract_sn">
             <label class="layui-form-label">合同编号</label>
             <div class="layui-input-block">
                 <input type="text" name="contract_sn" required lay-verify="required" placeholder="不用填写，系统自动生成"
@@ -138,12 +138,42 @@
 {block name="js"}
 {__block__}
 <script>
-    layui.use(['form', 'laydate', 'upload'], function () {
+    layui.use(['form', 'laydate', 'upload', 'util'], function () {
         var $ = layui.jquery;
         var form = layui.form;
         var laydate = layui.laydate;
         var upload = layui.upload;
-        console.log($('input[name="extra[0][\'content\']"]'))
+        var util = layui.util;
+
+        // 双击自定义合同号
+        $('#contract_sn').on('dblclick', function () {
+            if ($('select[name="category_id"]').val().length === 0 || $('select[name="type_id"]').val().length === 0) {
+                layer.msg('请先选择分类与类别');
+                return false;
+            }
+            var sn = $('input[name="contract_sn"]').val();
+            var snData = sn.split('-');
+            layer.prompt({
+                formType: 0,
+                value: snData[2],
+                title: '请输入自定义合同号'
+            }, function(value, index, elem){
+                // 判断是否为数字
+                if (isNaN(value)){
+                    layer.msg('合同编号必须为数字');
+                    return false;
+                }
+                // 2位补0，并取正
+                snData[2] = util.digit(Math.abs(parseInt(value)), 2);
+                // 拼接合同编号
+                var newSn = snData.join('-', snData);
+                // input赋值
+                $('input[name="contract_sn"]').val(newSn)
+                layer.msg('合同号自定义完成');
+                layer.close(index);
+            });
+        })
+
         // plus extra input
         var extraBox = $('#extra');
         var plusCount = 0;
@@ -186,6 +216,7 @@
         laydate.render({
             elem: '#due_date' //指定元素
         });
+
         // 监听category select
         var category = null;
         form.on('select(category)', function (data) {
@@ -253,6 +284,10 @@
         })
         // 提交
         form.on('submit(formDemo)', function (data) {
+            if (data.field.contract_date > data.field.due_date) {
+                layer.msg('到期日不能早于签约日',{icon: 2});
+                return false;
+            }
             var index1 = layer.load(1);
             $.post({
                 type: 'POST',

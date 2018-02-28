@@ -8,9 +8,11 @@
 
 namespace app\index\controller;
 
+use app\index\lib\enum\ContractStatusEnum;
+use app\index\model\Approval as ApprovalModel;
 use app\index\model\ApprovalNode;
 use app\index\model\Contract;
-use app\index\model\Approval as ApprovalModel;
+use app\index\controller\Contract as ContractController;
 use app\index\model\User;
 use think\Db;
 use think\Exception;
@@ -60,6 +62,8 @@ class Approval extends BaseController
                 // 开启审批
                 if ($post['start'] == 1) {
                     $this->start($approvalModel->id);
+                } else {
+                    ContractController::setStatus($approvalModel->contract_id, ContractStatusEnum::WAITING);
                 }
                 return $result;
             } catch (Exception $e) {
@@ -297,8 +301,11 @@ class Approval extends BaseController
             }
 
             // 开启审批并将第1个节点设置为当前节点,审批状态设置为审批中
-            $approvalModel = new ApprovalModel();
-            $result = $approvalModel->save($data, ['id' => $approvalId]);
+            $approvalModel = ApprovalModel::get($approvalId);
+            $result = $approvalModel->save($data);
+
+            // 设置合同状态为审批中
+            ContractController::setStatus($approvalModel->contract_id, ContractStatusEnum::APPROVALING);
 
             Db::commit();
         } catch (Exception $e) {
@@ -335,6 +342,7 @@ class Approval extends BaseController
     {
         $approval = ApprovalModel::get($approvalId);
         $data = ['start'=>2];
+        ContractController::setStatus($approval->contract_id, ContractStatusEnum::WAITING);
         return $approval->save($data);
     }
     // update total nodes

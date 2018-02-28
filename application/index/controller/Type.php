@@ -30,6 +30,10 @@ class Type extends BaseController
             if ($one) {
                 return -1; // 合同类别存在
             }
+            $one = $type->where('sn', 'eq', $post['sn'])->find();
+            if ($one) {
+                return -2; // 合同类别编号存在
+            }
             $result = $type->allowField(true)->save($post);
             return $result;
         }

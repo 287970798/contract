@@ -18,7 +18,7 @@ use think\Db;
 use think\Exception;
 use think\Session;
 use app\index\model\Contract as ContractModel;
-use app\index\model\Approval;
+use app\index\model\Approval as ApprovalModel;
 
 class Contract extends BaseController
 {
@@ -112,7 +112,7 @@ class Contract extends BaseController
                 return -1; // 合同不存在
             }
             // 检测合同是否关联开户状态的审批流
-            $one = Approval::where('contract_id', $id)->where('start', 1)->find();
+            $one = ApprovalModel::where('contract_id', $id)->where('start', 1)->find();
             if ($one) {
                 return 'hasStartedApproval';
             }
@@ -244,7 +244,7 @@ class Contract extends BaseController
         }
 
         // 是否关联审批
-        $one = Approval::where('contract_id', $id)->find();
+        $one = ApprovalModel::where('contract_id', $id)->find();
         if ($one) {
             return 'hasApproval';
         }
@@ -388,5 +388,11 @@ class Contract extends BaseController
         }
 
         return $contracts;
+    }
+
+    // set status
+    public static function setStatus($contractId, $status)
+    {
+        return ContractModel::where('id', $contractId)->setField('status', $status);
     }
 }

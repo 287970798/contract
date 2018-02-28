@@ -20,7 +20,7 @@
                 </select>
             </div>
         </div>
-        <div class="layui-form-item">
+        <div class="layui-form-item" id="sn">
             <label class="layui-form-label">类别编号</label>
             <div class="layui-input-block">
                 <input type="text" name="sn" required lay-verify="required" placeholder="类别编号" autocomplete="off"
@@ -46,9 +46,30 @@
 {block name="js"}
 {__block__}
 <script>
-    layui.use(['form'], function () {
+    layui.use(['form','util'], function () {
         var $ = layui.jquery;
         var form = layui.form;
+        var util = layui.util;
+
+        // 双击自定义类型编号
+        $('#sn').on('dblclick', function () {
+            if ($('select[name="category_id"]').val().length === 0) {
+                layer.msg('请先选择合同分类');
+                return false;
+            }
+            var sn = $('input[name="sn"]').val();
+            layer.prompt({
+                formType: 0,
+                value: sn,
+                title: '请输入自定义合同类型编号',
+            }, function(value, index, elem){
+                var newSn = util.digit(parseInt(value), 3) + '';
+                $('input[name="sn"]').val(newSn)
+                layer.msg('合同类型编号号自定义完成');
+                layer.close(index);
+            });
+        })
+
         // 监听类别
         form.on('select(category)', function(data){
             console.log(data.elem); //得到select原始DOM对象
@@ -89,6 +110,8 @@
                         });
                     } else if (result === -1) {
                         layer.open({content:'添加失败！合同类别已存在！', icon:2});
+                    } else if (result === -2) {
+                        layer.open({content:'添加失败！合同类别编号已存在！', icon:2});
                     }
                 },
                 error: function (error) {
