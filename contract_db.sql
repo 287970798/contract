@@ -10,7 +10,7 @@ Target Server Type    : MYSQL
 Target Server Version : 50718
 File Encoding         : 65001
 
-Date: 2018-02-27 18:39:12
+Date: 2018-03-01 19:10:08
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -27,14 +27,14 @@ CREATE TABLE `approval` (
   `name` varchar(255) NOT NULL DEFAULT '' COMMENT '// 审批流程名称',
   `total_nodes` int(2) unsigned NOT NULL DEFAULT '0' COMMENT '// 该审批总节点数',
   `process` int(2) unsigned NOT NULL DEFAULT '0' COMMENT '// 已审批的人数',
-  `status` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '// 审批状态 0 待审 1 审批中 2 通过 3 驳回',
+  `status` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '// 审批状态 0 待审 1 审批中 2 通过 3 驳回 4 撤销',
   `start` tinyint(1) unsigned NOT NULL DEFAULT '2' COMMENT '// 是否启用  1 启用 2 未启用',
   `note` varchar(255) NOT NULL DEFAULT '',
   `create_time` int(11) DEFAULT NULL,
   `update_time` int(11) DEFAULT NULL,
   `delete_time` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Records of approval
@@ -47,8 +47,14 @@ INSERT INTO `approval` VALUES ('8', '15', '23', '16', 'this is a test approval',
 INSERT INTO `approval` VALUES ('9', '15', '24', null, 'another contract\'s approval', '0', '0', '0', '2', '', '1519361932', '1519637847', '1519637847');
 INSERT INTO `approval` VALUES ('10', '15', '25', '18', 'hh approval2', '2', '1', '1', '2', '', '1519362802', '1519637849', '1519637849');
 INSERT INTO `approval` VALUES ('11', '16', '26', '23', '又一个审批', '1', '2', '3', '1', '', '1519553208', '1519644236', null);
-INSERT INTO `approval` VALUES ('12', '16', '2', '22', '关于人资2号合同的审批', '1', '1', '2', '1', '', '1519637933', '1519638035', null);
-INSERT INTO `approval` VALUES ('13', '16', '31', '24', '正审', '1', '0', '1', '2', '', '1519695435', '1519726619', null);
+INSERT INTO `approval` VALUES ('12', '16', '2', '22', '关于人资2号合同的审批', '1', '1', '2', '1', '', '1519637933', '1519822550', null);
+INSERT INTO `approval` VALUES ('13', '16', '31', '25', '正审', '1', '1', '2', '1', '', '1519695435', '1519866676', null);
+INSERT INTO `approval` VALUES ('14', '16', '27', '26', '测试合同状态的审批', '1', '1', '2', '1', '', '1519822832', '1519874055', null);
+INSERT INTO `approval` VALUES ('15', '16', '28', '27', '基本原则审批', '1', '1', '3', '1', '', '1519874141', '1519874162', null);
+INSERT INTO `approval` VALUES ('16', '15', '28', '29', '基本原则的另一个审批', '1', '0', '4', '1', '', '1519887247', '1519893888', null);
+INSERT INTO `approval` VALUES ('17', '15', '25', null, '这是个合同的另一个审批', '0', '0', '0', '2', '', '1519887382', '1519889791', '1519889791');
+INSERT INTO `approval` VALUES ('18', '15', '23', null, 'this is a contract 的另一个审批', '1', '0', '0', '2', '', '1519887450', '1519889320', '1519889320');
+INSERT INTO `approval` VALUES ('19', '14', '28', '30', '基本原则的另另外一个审批', '1', '0', '1', '1', '', '1519896725', '1519896755', null);
 
 -- ----------------------------
 -- Table structure for approval_node
@@ -65,7 +71,7 @@ CREATE TABLE `approval_node` (
   `update_time` int(11) DEFAULT NULL,
   `delete_time` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=31 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Records of approval_node
@@ -89,7 +95,13 @@ INSERT INTO `approval_node` VALUES ('20', '3', '1', '1', '0', '', '1519373485', 
 INSERT INTO `approval_node` VALUES ('21', '11', '1', '16', '1', '通过', '1519553208', '1519637851', '1519637851');
 INSERT INTO `approval_node` VALUES ('22', '12', '1', '14', '1', '通过', '1519637933', '1519638035', null);
 INSERT INTO `approval_node` VALUES ('23', '11', '1', '14', '2', '驳回', '1519642850', '1519644236', null);
-INSERT INTO `approval_node` VALUES ('24', '13', '1', '1', '0', '', '1519695435', '1519695435', null);
+INSERT INTO `approval_node` VALUES ('24', '13', '1', '1', '0', '', '1519695435', '1519781775', '1519781775');
+INSERT INTO `approval_node` VALUES ('25', '13', '2', '16', '1', '通过', '1519781598', '1519783110', null);
+INSERT INTO `approval_node` VALUES ('26', '14', '1', '1', '1', '通过', '1519866019', '1519874055', null);
+INSERT INTO `approval_node` VALUES ('27', '15', '1', '1', '2', '驳回', '1519874141', '1519874162', null);
+INSERT INTO `approval_node` VALUES ('28', '18', '1', '1', '-1', '', '1519887450', '1519889320', '1519889320');
+INSERT INTO `approval_node` VALUES ('29', '16', '1', '15', '0', '', '1519893880', '1519893888', null);
+INSERT INTO `approval_node` VALUES ('30', '19', '1', '16', '0', '', '1519896755', '1519896755', null);
 
 -- ----------------------------
 -- Table structure for approval_notice
@@ -104,7 +116,7 @@ CREATE TABLE `approval_notice` (
   `update_time` int(11) DEFAULT NULL,
   `delete_time` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Records of approval_notice
@@ -112,6 +124,9 @@ CREATE TABLE `approval_notice` (
 INSERT INTO `approval_notice` VALUES ('2', '16', '12', '已通过', '1519638035', '1519704222', '1519704222');
 INSERT INTO `approval_notice` VALUES ('3', '16', '11', '已驳加', null, '1519694961', '1519694961');
 INSERT INTO `approval_notice` VALUES ('4', '16', '11', '已驳回', '1519644236', '1519644417', '1519644417');
+INSERT INTO `approval_notice` VALUES ('5', '16', '13', '已通过', '1519783110', '1519783180', '1519783180');
+INSERT INTO `approval_notice` VALUES ('6', '16', '14', '已通过', '1519874055', '1519874064', '1519874064');
+INSERT INTO `approval_notice` VALUES ('7', '16', '15', '已驳回', '1519874162', '1519874177', '1519874177');
 
 -- ----------------------------
 -- Table structure for category
@@ -154,33 +169,38 @@ CREATE TABLE `contract` (
   `manager` varchar(255) NOT NULL DEFAULT '' COMMENT '// 合同负责人',
   `contract_date` int(11) DEFAULT NULL COMMENT '// 合同签约日期',
   `due_date` int(11) DEFAULT NULL COMMENT '// 合同到期在日',
-  `status` tinyint(1) unsigned DEFAULT NULL COMMENT '// 合同状态 备用 0 审核中 1 审核通过 2 审核未通过 3 已完成',
+  `status` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '// 合同状态 0 新录 1 待审 2 审批中 3 驳加 4 过审 5 执行中 6 中止 7 已续期 8 结束',
   `note` varchar(255) NOT NULL DEFAULT '',
   `create_time` int(11) unsigned DEFAULT NULL,
   `update_time` int(11) unsigned DEFAULT NULL,
   `delete_time` int(11) unsigned DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=36 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=41 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Records of contract
 -- ----------------------------
-INSERT INTO `contract` VALUES ('1', '1', '0', '1', '1', '人事管理2-001-01', 'test', '1', '4', '技术研发部', '月上禾', '1519142400', '-28800', null, '', null, '1519192562', null);
-INSERT INTO `contract` VALUES ('2', '1', '0', '1', '2', '人事管理2-001-02', '人资2号合同文件', '1', '3', '技术研发部', '月上禾', '1519142400', '1553097600', null, '123456', '1519144012', '1519144012', null);
-INSERT INTO `contract` VALUES ('13', '1', '0', '1', '3', '人事管理2-001-03', 'asdf', '2', '5', '技术研发部', '月上禾', '1519142400', '1519228800', null, 'asdf', '1519150901', '1519193655', null);
-INSERT INTO `contract` VALUES ('16', '1', '0', '1', '4', '人事管理2-001-04', 'asdfx', '1', '3', '技术研发部', '月上禾', '1519228800', '1519228800', null, 'asdfasdfsadf', '1519154951', '1519194235', '1519194235');
-INSERT INTO `contract` VALUES ('22', '1', '0', '1', '5', '人事管理2-001-05', 'asdfasd', '1', '3', '技术研发部', '月上禾', '1519228800', '1519660800', null, 'asdfsdfddddd', '1519284816', '1519284816', null);
-INSERT INTO `contract` VALUES ('23', '1', '0', '1', '6', '人事管理2-001-06', 'this is a contract', '2', '5', '腾讯社交部', '马化腾', '1519315200', '1519747200', null, '', '1519361765', '1519361765', null);
-INSERT INTO `contract` VALUES ('24', '3', '0', '2', '1', '联创团-001-01', 'another contract', '2', '5', '腾讯社交部', '马化腾', '1519315200', '1522252800', null, '', '1519361907', '1519361907', null);
-INSERT INTO `contract` VALUES ('25', '3', '0', '2', '2', '联创团-001-02', '这是个合同', '2', '5', '腾讯社交部', '马化腾', '1519315200', '1519747200', null, '', '1519362768', '1519362768', null);
-INSERT INTO `contract` VALUES ('26', '1', '0', '1', '7', '人事管理2-001-07', '测试上传', '1', '3', '腾讯社交部', '马化腾', '1519315200', '1519747200', null, '', '1519386023', '1519386023', null);
-INSERT INTO `contract` VALUES ('27', '3', '0', '2', '3', '联创团-001-03', '另一个测试上传', '1', '4', '腾讯社交部', '马化腾', '1519315200', '1519747200', null, '', '1519386135', '1519386135', null);
-INSERT INTO `contract` VALUES ('28', '1', '0', '1', '8', '人事管理2-001-08', '基本原则', '1', '3', '腾讯社交部', '马化腾', '1519315200', '1519747200', null, '', '1519386478', '1519386478', null);
-INSERT INTO `contract` VALUES ('29', '1', '0', '1', '9', '人事管理2-001-09', '枯干上十', '1', '3', '腾讯社交部', '马化腾', '1519315200', '1519747200', null, '', '1519386511', '1519462871', null);
-INSERT INTO `contract` VALUES ('30', '1', '16', '3', '1', '人事管理2-002-01', '教育代理机构合同', '2', '5', '技术研发部', '月上禾', '1519488000', '1519747200', null, '', '1519557234', '1519557234', null);
-INSERT INTO `contract` VALUES ('31', '1', '16', '1', '10', '人事管理2-001-10', '测试劳动合同1', '5', '8', '技术研发部', '公老师', '1519574400', '1551110400', null, '测试用', '1519612464', '1519724552', null);
-INSERT INTO `contract` VALUES ('34', '1', '16', '1', '11', '人事管理2-001-11', '日志合同', '4', '7', '技术研发部', '月上禾', '1519660800', '1519747200', null, '', '1519720142', '1519720861', '1519720861');
-INSERT INTO `contract` VALUES ('35', '3', '15', '2', '4', '联创团-001-04', '另一个日志合同', '4', '7', '腾讯社交部', '马化腾', '1519660800', '1519747200', null, '', '1519721477', '1519721549', '1519721549');
+INSERT INTO `contract` VALUES ('1', '1', '0', '1', '1', '人事管理2-001-01', 'test', '1', '4', '技术研发部', '月上禾', '1519142400', '-28800', '0', '', null, '1519192562', null);
+INSERT INTO `contract` VALUES ('2', '1', '0', '1', '2', '人事管理2-001-02', '人资2号合同文件', '1', '3', '技术研发部', '月上禾', '1519142400', '1553097600', '1', '123456', '1519144012', '1519144012', null);
+INSERT INTO `contract` VALUES ('13', '1', '0', '1', '3', '人事管理2-001-03', 'asdf', '2', '5', '技术研发部', '月上禾', '1519142400', '1519228800', '0', 'asdf', '1519150901', '1519193655', null);
+INSERT INTO `contract` VALUES ('16', '1', '0', '1', '4', '人事管理2-001-04', 'asdfx', '1', '3', '技术研发部', '月上禾', '1519228800', '1519228800', '0', 'asdfasdfsadf', '1519154951', '1519194235', '1519194235');
+INSERT INTO `contract` VALUES ('22', '1', '0', '1', '5', '人事管理2-001-05', 'asdfasd', '1', '3', '技术研发部', '月上禾', '1519228800', '1519660800', '0', 'asdfsdfddddd', '1519284816', '1519284816', null);
+INSERT INTO `contract` VALUES ('23', '1', '0', '1', '6', '人事管理2-001-06', 'this is a contract', '2', '5', '腾讯社交部', '马化腾', '1519315200', '1519747200', '0', '', '1519361765', '1519361765', null);
+INSERT INTO `contract` VALUES ('24', '3', '0', '2', '1', '联创团-001-01', 'another contract', '2', '5', '腾讯社交部', '马化腾', '1519315200', '1522252800', '0', '', '1519361907', '1519361907', null);
+INSERT INTO `contract` VALUES ('25', '3', '0', '2', '2', '联创团-001-02', '这是个合同', '2', '5', '腾讯社交部', '马化腾', '1519315200', '1519747200', '0', '', '1519362768', '1519362768', null);
+INSERT INTO `contract` VALUES ('26', '1', '0', '1', '7', '人事管理2-001-07', '测试上传', '1', '3', '腾讯社交部', '马化腾', '1519315200', '1519747200', '0', '', '1519386023', '1519386023', null);
+INSERT INTO `contract` VALUES ('27', '3', '0', '2', '3', '联创团-001-03', '另一个测试上传', '1', '4', '腾讯社交部', '马化腾', '1519315200', '1519747200', '4', '', '1519386135', '1519386135', null);
+INSERT INTO `contract` VALUES ('28', '1', '0', '1', '8', '人事管理2-001-08', '基本原则', '1', '3', '腾讯社交部', '马化腾', '1519315200', '1519747200', '2', '', '1519386478', '1519386478', null);
+INSERT INTO `contract` VALUES ('29', '1', '0', '1', '9', '人事管理2-001-09', '枯干上十', '1', '3', '腾讯社交部', '马化腾', '1519315200', '1519747200', '5', '', '1519386511', '1519462871', null);
+INSERT INTO `contract` VALUES ('30', '1', '16', '3', '1', '人事管理2-002-01', '教育代理机构合同', '2', '5', '技术研发部', '月上禾', '1519488000', '1519747200', '6', '', '1519557234', '1519557234', null);
+INSERT INTO `contract` VALUES ('31', '1', '16', '1', '10', '人事管理2-001-10', '测试劳动合同1', '5', '8', '技术研发部', '公老师', '1519574400', '1551110400', '2', '测试用', '1519612464', '1519724552', null);
+INSERT INTO `contract` VALUES ('34', '1', '16', '1', '11', '人事管理2-001-11', '日志合同', '4', '7', '技术研发部', '月上禾', '1519660800', '1519747200', '0', '', '1519720142', '1519720861', '1519720861');
+INSERT INTO `contract` VALUES ('35', '3', '15', '2', '4', '联创团-001-04', '另一个日志合同', '4', '7', '腾讯社交部', '马化腾', '1519660800', '1519747200', '0', '', '1519721477', '1519721549', '1519721549');
+INSERT INTO `contract` VALUES ('36', '1', '16', '1', '11', '人事管理2-001-11', '测试编号的合同', '1', '3', '技术研发部', '月上禾', '1519747200', '1519747200', '8', '', '1519812251', '1519812251', null);
+INSERT INTO `contract` VALUES ('37', '1', '16', '1', '15', '人事管理2-001-15', '测试编号的合同2', '1', '3', '技术研发部', '月上禾', '1519660800', '1519747200', '7', '', '1519812337', '1519812337', null);
+INSERT INTO `contract` VALUES ('38', '1', '16', '5', '1', '人事管理2-010-01', '测试编号的合同2', '1', '3', '技术研发部', '月上禾', '1519747200', '1519747200', '8', '', '1519818378', '1519818378', null);
+INSERT INTO `contract` VALUES ('39', '1', '15', '3', '100', '人事管理2-002-100', '这是一个新合同', '2', '5', '腾讯社交部', '马化腾', '1519833600', '1521561600', '0', '', '1519888140', '1519888140', null);
+INSERT INTO `contract` VALUES ('40', '1', '16', '1', '16', '人事管理2-001-16', '测试的合同', '1', '3', '技术研发部', '月上禾', '1519833600', '1520870400', '7', '', '1519900269', '1519900269', null);
 
 -- ----------------------------
 -- Table structure for contract_extra
@@ -230,8 +250,6 @@ INSERT INTO `contract_file` VALUES ('2', '16', '20180221/44b5baff2b3cbc568225c90
 INSERT INTO `contract_file` VALUES ('3', '22', '20180222/b88f7bdccf1aac6763d7444f1e8fbed5.jpg', '微信图片_20180209170601.jpg', '1519284816', '1519284816', null);
 INSERT INTO `contract_file` VALUES ('9', '29', '20180223/8c0b78e5375aab3c1f046ee87b4b7985.jpg', 'logo@sbnl.jpg', '1519386511', '1519462871', null);
 INSERT INTO `contract_file` VALUES ('10', '31', '20180226/3f98051be97568f1ee0eaf4110c83500.pdf', '劳动合同-联创优学.pdf', '1519612464', '1519724552', null);
-INSERT INTO `contract_file` VALUES ('11', '34', '', '', '1519720840', '1519720861', '1519720861');
-INSERT INTO `contract_file` VALUES ('12', '35', '', '', '1519721510', '1519721549', '1519721549');
 
 -- ----------------------------
 -- Table structure for contract_log
@@ -248,7 +266,7 @@ CREATE TABLE `contract_log` (
   `update_time` int(11) DEFAULT NULL,
   `delete_time` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Records of contract_log
@@ -257,6 +275,20 @@ INSERT INTO `contract_log` VALUES ('3', '15', '35', '创建了新合同', '223.9
 INSERT INTO `contract_log` VALUES ('4', '15', '35', '修改了合同', '223.98.165.222', '中国山东济南移动', '1519721510', '1519721510', null);
 INSERT INTO `contract_log` VALUES ('5', '15', '35', '删除了合同', '223.98.165.222', '中国山东济南移动', '1519721549', '1519721549', null);
 INSERT INTO `contract_log` VALUES ('6', '14', '31', '修改了合同', '223.98.165.222', '中国山东济南移动', '1519724552', '1519724552', null);
+INSERT INTO `contract_log` VALUES ('7', '16', '36', '创建了新合同', '223.98.163.155', '中国山东济南移动', '1519812251', '1519812251', null);
+INSERT INTO `contract_log` VALUES ('8', '16', '37', '创建了新合同', '223.98.163.155', '中国山东济南移动', '1519812337', '1519812337', null);
+INSERT INTO `contract_log` VALUES ('9', '16', '38', '创建了新合同', '223.98.163.155', '中国山东济南移动', '1519818381', '1519818381', null);
+INSERT INTO `contract_log` VALUES ('10', '15', '39', '创建了新合同', '223.98.163.155', '中国山东济南移动', '1519888140', '1519888140', null);
+INSERT INTO `contract_log` VALUES ('11', '1', '25', '删除了审批这是个合同的另一个审批，关联合同状态自动更新为新录。关联合同为', '223.98.163.155', '中国山东济南移动', '1519889791', '1519889791', null);
+INSERT INTO `contract_log` VALUES ('12', '1', '28', '开启了审批 基本原则的另一个审批，关联合同状态自动同步为审批中。关联合同为', '223.98.163.155', '中国山东济南移动', '1519893888', '1519893888', null);
+INSERT INTO `contract_log` VALUES ('14', '1', '28', '撤销了审批 基本原则的另一个审批，关联合同状态自动同步为新录。关联合同为', '223.98.163.155', '中国山东济南移动', '1519896467', '1519896467', null);
+INSERT INTO `contract_log` VALUES ('15', '14', '28', '新增了审批 基本原则的另另外一个审批，关联合同状态自动更新为待审。关联合同为', '223.98.163.155', '中国山东济南移动', '1519896725', '1519896725', null);
+INSERT INTO `contract_log` VALUES ('16', '14', '28', '开启了审批 基本原则的另另外一个审批，关联合同状态自动同步为审批中。关联合同为', '223.98.163.155', '中国山东济南移动', '1519896755', '1519896755', null);
+INSERT INTO `contract_log` VALUES ('17', '16', '40', '创建了新合同', '223.98.163.155', '中国山东济南移动', '1519900269', '1519900269', null);
+INSERT INTO `contract_log` VALUES ('18', '17', '40', '中止了合同', '223.98.163.155', '中国山东济南移动', '1519900808', '1519900808', null);
+INSERT INTO `contract_log` VALUES ('19', '17', '40', '设置执行了合同', '223.98.163.155', '中国山东济南移动', '1519900826', '1519900826', null);
+INSERT INTO `contract_log` VALUES ('20', '17', '40', '设置续期了合同', '223.98.163.155', '中国山东济南移动', '1519900846', '1519900846', null);
+INSERT INTO `contract_log` VALUES ('21', '17', '36', '设置完成了合同', '223.98.163.155', '中国山东济南移动', '1519900863', '1519900863', null);
 
 -- ----------------------------
 -- Table structure for customer
@@ -320,24 +352,44 @@ CREATE TABLE `login_log` (
   `user_id` int(10) unsigned NOT NULL,
   `ip` varchar(15) NOT NULL DEFAULT '',
   `location` varchar(255) NOT NULL DEFAULT '',
+  `note` varchar(255) NOT NULL DEFAULT '',
   `create_time` int(11) DEFAULT NULL,
   `update_time` int(11) DEFAULT NULL,
   `delete_time` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Records of login_log
 -- ----------------------------
-INSERT INTO `login_log` VALUES ('1', '16', '223.98.165.222', '中国山东济南移动', '1519705131', '1519705131', null);
-INSERT INTO `login_log` VALUES ('2', '16', '223.98.165.222', '中国山东济南移动', '1519708427', '1519708427', null);
-INSERT INTO `login_log` VALUES ('3', '16', '223.98.165.222', '中国山东济南移动', '1519709403', '1519709403', null);
-INSERT INTO `login_log` VALUES ('4', '16', '223.98.165.222', '中国山东济南移动', '1519713802', '1519713802', null);
-INSERT INTO `login_log` VALUES ('5', '15', '223.98.165.222', '中国山东济南移动', '1519721213', '1519721213', null);
-INSERT INTO `login_log` VALUES ('6', '14', '223.98.165.222', '中国山东济南移动', '1519724520', '1519724520', null);
-INSERT INTO `login_log` VALUES ('7', '16', '223.98.165.222', '中国山东济南移动', '1519726515', '1519726515', null);
-INSERT INTO `login_log` VALUES ('8', '16', '113.129.133.154', '中国山东济南电信', '1519726727', '1519726727', null);
-INSERT INTO `login_log` VALUES ('9', '16', '113.129.133.154', '中国山东济南电信', '1519726805', '1519726805', null);
+INSERT INTO `login_log` VALUES ('1', '16', '223.98.165.222', '中国山东济南移动', '登录', '1519705131', '1519705131', null);
+INSERT INTO `login_log` VALUES ('2', '16', '223.98.165.222', '中国山东济南移动', '登录', '1519708427', '1519708427', null);
+INSERT INTO `login_log` VALUES ('3', '16', '223.98.165.222', '中国山东济南移动', '登录', '1519709403', '1519709403', null);
+INSERT INTO `login_log` VALUES ('4', '16', '223.98.165.222', '中国山东济南移动', '登录', '1519713802', '1519713802', null);
+INSERT INTO `login_log` VALUES ('5', '15', '223.98.165.222', '中国山东济南移动', '登录', '1519721213', '1519721213', null);
+INSERT INTO `login_log` VALUES ('6', '14', '223.98.165.222', '中国山东济南移动', '登录', '1519724520', '1519724520', null);
+INSERT INTO `login_log` VALUES ('7', '16', '223.98.165.222', '中国山东济南移动', '登录', '1519726515', '1519726515', null);
+INSERT INTO `login_log` VALUES ('8', '16', '113.129.133.154', '中国山东济南电信', '登录', '1519726727', '1519726727', null);
+INSERT INTO `login_log` VALUES ('9', '16', '113.129.133.154', '中国山东济南电信', '登录', '1519726805', '1519726805', null);
+INSERT INTO `login_log` VALUES ('10', '16', '223.98.165.222', '中国山东济南移动', '登录', '1519781464', '1519781464', null);
+INSERT INTO `login_log` VALUES ('11', '16', '223.98.165.222', '中国山东济南移动', '登录', '1519781694', '1519781694', null);
+INSERT INTO `login_log` VALUES ('12', '16', '223.98.165.222', '中国山东济南移动', '登录', '1519783165', '1519783165', null);
+INSERT INTO `login_log` VALUES ('13', '16', '223.98.165.222', '中国山东济南移动', '登录', '1519795525', '1519795525', null);
+INSERT INTO `login_log` VALUES ('14', '16', '223.98.163.155', '中国山东济南移动', '登录', '1519822885', '1519822885', null);
+INSERT INTO `login_log` VALUES ('15', '16', '223.98.163.155', '中国山东济南移动', '登录', '1519864246', '1519864246', null);
+INSERT INTO `login_log` VALUES ('16', '16', '223.98.163.155', '中国山东济南移动', '登录', '1519873987', '1519873987', null);
+INSERT INTO `login_log` VALUES ('17', '1', '223.98.163.155', '中国山东济南移动', '登录', '1519874038', '1519874038', null);
+INSERT INTO `login_log` VALUES ('18', '1', '223.98.163.155', '中国山东济南移动', '登录', '1519883735', '1519883735', null);
+INSERT INTO `login_log` VALUES ('19', '15', '223.98.163.155', '中国山东济南移动', '登录', '1519883753', '1519883753', null);
+INSERT INTO `login_log` VALUES ('20', '14', '223.98.163.155', '中国山东济南移动', '登录', '1519894170', '1519894170', null);
+INSERT INTO `login_log` VALUES ('21', '16', '223.98.163.155', '中国山东济南移动', '登录', '1519897348', '1519897348', null);
+INSERT INTO `login_log` VALUES ('22', '15', '223.98.163.155', '中国山东济南移动', '登录', '1519898170', '1519898170', null);
+INSERT INTO `login_log` VALUES ('23', '17', '223.98.163.155', '中国山东济南移动', '登录', '1519900341', '1519900341', null);
+INSERT INTO `login_log` VALUES ('24', '17', '223.98.163.155', '中国山东济南移动', '登录', '1519901891', '1519901891', null);
+INSERT INTO `login_log` VALUES ('25', '17', '223.98.163.155', '中国山东济南移动', '退出', '1519902191', '1519902191', null);
+INSERT INTO `login_log` VALUES ('26', '17', '223.98.163.155', '中国山东济南移动', '登录', '1519902212', '1519902212', null);
+INSERT INTO `login_log` VALUES ('27', '17', '223.98.163.155', '中国山东济南移动', '退出', '1519902352', '1519902352', null);
+INSERT INTO `login_log` VALUES ('28', '15', '223.98.163.155', '中国山东济南移动', '退出', '1519902442', '1519902442', null);
 
 -- ----------------------------
 -- Table structure for type
@@ -353,7 +405,7 @@ CREATE TABLE `type` (
   `update_time` int(11) unsigned DEFAULT NULL,
   `delete_time` int(11) unsigned DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Records of type
@@ -361,6 +413,7 @@ CREATE TABLE `type` (
 INSERT INTO `type` VALUES ('1', '001', '1', '劳动合同', '1234563', '1519101157', '1519119818', null);
 INSERT INTO `type` VALUES ('2', '001', '3', '1团22', '联创团1团合同2222', '1519101241', '1519119982', null);
 INSERT INTO `type` VALUES ('3', '002', '1', '制度', '123', null, null, null);
+INSERT INTO `type` VALUES ('5', '010', '1', '测试编号', '', '1519811116', '1519811116', null);
 
 -- ----------------------------
 -- Table structure for user
@@ -380,7 +433,7 @@ CREATE TABLE `user` (
   `update_time` int(11) unsigned DEFAULT NULL,
   `delete_time` int(11) unsigned DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Records of user
@@ -395,3 +448,4 @@ INSERT INTO `user` VALUES ('13', '2', 'test5', 'tom', 'fashion', '15966326431', 
 INSERT INTO `user` VALUES ('14', '2', 'jackma', '马云', '阿里团', '15966326431', '1', '7c4a8d09ca3762af61e59520943dc26494f8941b', '', '1518312151', '1518312151', null);
 INSERT INTO `user` VALUES ('15', '2', 'tony', '马化腾', '腾讯社交部', '15966326424', '1', '7c4a8d09ca3762af61e59520943dc26494f8941b', '', '1518312243', '1518321965', null);
 INSERT INTO `user` VALUES ('16', '1', 'admin', '月上禾', '技术研发部', '15699658757', '1', '7c4a8d09ca3762af61e59520943dc26494f8941b', '超管理员拥有所有权限', '1518320754', '1519453143', null);
+INSERT INTO `user` VALUES ('17', '1', 'kvstone', '金错刀', '技术研发部', '18963098888', '1', '789f8ab2bd8ee855ed4c61ac265fbcd77ec508b6', '开发测试帐号', '1519897233', '1519897233', null);
