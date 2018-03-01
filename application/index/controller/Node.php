@@ -4,6 +4,7 @@
 namespace app\index\controller;
 
 
+use app\index\lib\enum\ContractStatusEnum;
 use app\index\model\ApprovalNode;
 use think\Db;
 use think\Exception;
@@ -107,6 +108,8 @@ class Node extends BaseController
                         'id' => $approvalId,
                         'status' => 2   // 审批流通过结束
                     ]);
+                    // 同步合同状态
+                    Contract::setStatus($approval->contract_id, ContractStatusEnum::PASS);
                     // 添加审批通知
                     Notice::add(['model'=>'ApprovalNotice', 'user_id'=>$approval->user_id, 'approval_id'=>$approvalId, 'note'=>'已通过']);
                 }
@@ -115,6 +118,8 @@ class Node extends BaseController
                     'id' => $approvalId,
                     'status' => 3   // 审批流驳回结束
                 ]);
+                // 同步合同状态
+                Contract::setStatus($approval->contract_id, ContractStatusEnum::REJECT);
                 Notice::add(['model'=>'ApprovalNotice', 'user_id'=>$approval->user_id, 'approval_id'=>$approvalId, 'note'=>'已驳回']);
             }
             Db::commit();

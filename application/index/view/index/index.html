@@ -8,7 +8,7 @@
                     <li>即将到期</li>
                     <li>已过期</li>
                 </ul>
-                <div class="layui-tab-content" style="height: 216px;">
+                <div class="layui-tab-content" style="min-height: 216px;">
                     <div class="layui-tab-item layui-show">
                         <table class="layui-table">
                             {volist name="contracts.new" id="contract" empty="暂时没有数据"}
@@ -52,7 +52,7 @@
                     <li class="layui-this">我发起的审批</li>
                     <li>我审批的</li>
                 </ul>
-                <div class="layui-tab-content" style="height: 216px;">
+                <div class="layui-tab-content" style="min-height: 216px;">
                     <div class="layui-tab-item layui-show">
                         {if $approvals.beSponsor->toArray()}
                         <table class="layui-table">
@@ -108,7 +108,7 @@
                 <ul class="layui-tab-title">
                     <li class="layui-this">我添加的客户</li>
                 </ul>
-                <div class="layui-tab-content" style="height: 216px;">
+                <div class="layui-tab-content" style="min-height: 216px;">
                     <div class="layui-tab-item layui-show">
                         <table class="layui-table">
                             {volist name="customers" id="customer" empty="暂时没有数据"}
@@ -127,7 +127,7 @@
                 <ul class="layui-tab-title">
                     <li class="layui-this">我添加的联系人</li>
                 </ul>
-                <div class="layui-tab-content" style="height: 216px;">
+                <div class="layui-tab-content" style="min-height: 216px;">
                     <div class="layui-tab-item layui-show">
                         <table class="layui-table">
                             {volist name="linkmans" id="linkman" empty="暂时没有数据"}

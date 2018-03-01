@@ -2,6 +2,7 @@
 namespace app\index\controller;
 
 
+use app\index\lib\enum\ContractStatusEnum;
 use app\index\model\ApprovalNode;
 use think\Session;
 use app\index\model\Contract;
@@ -15,6 +16,7 @@ class Index extends BaseController
     {
         $admin = Session::get('admin');
         $contracts = $this->contract($admin);
+//        dump($contracts);
         $approvals = $this->approval($admin);
         $customers = $this->customer($admin);
         $linkmans = $this->linkman($admin);
@@ -31,12 +33,13 @@ class Index extends BaseController
 
     public function contract($user)
     {
-        $new = Contract::where('manager', $user['name'])->order('id desc')->limit(5)->select();
-        $expire = Contract::where('manager', $user['name'])
-            ->where('due_date', '<', strtotime("+1 month"))
+        $new = Contract::where('user_id', $user->id)->order('id desc')->limit(5)->select();
+        $expire = Contract::where('user_id', $user->id)
+            ->whereTime('due_date', '<=', strtotime("+30 days"))
+            ->where('status', ContractStatusEnum::EXECUTING)
             ->order('due_date asc, id desc')
             ->limit(5)
-            ->select();
+            ->select()->toArray();
 
         $expiring = $overdue = [];
         foreach ($expire as $item) {
@@ -45,9 +48,10 @@ class Index extends BaseController
             if ($days >= 0) {
                 $expiring[] = $item;
             } else {
-                $overdue = $item;
+                $overdue[] = $item;
             }
         }
+
         return [
             'new' => $new,
             'expiring' => $expiring,
@@ -61,7 +65,7 @@ class Index extends BaseController
         $beSponsor = Approval::with(['contract','currentNode'=>['user']])
             ->where('user_id', $user['id'])
             ->where('start', 1)
-            ->limit(5)->select();
+            ->limit(4)->select();
         // 用户审批
         $nodes = ApprovalNode::field('id')->where('user_id', $user['id'])->select();
         $ids = '';
@@ -72,7 +76,7 @@ class Index extends BaseController
         $beApproval = Approval::with('contract')
             ->where('current_node_id', 'in', $ids)
             ->where('status', 1)
-            ->limit(5)
+            ->limit(4)
             ->order('update_time desc')
             ->select();
         return [

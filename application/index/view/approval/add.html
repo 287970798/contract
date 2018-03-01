@@ -22,9 +22,7 @@
                 <select name="contract_id" lay-verify="required" lay-filter="contract" lay-search>
                     <option value></option>
                     {volist name="contracts" id="contract"}
-                    {if !$contract.approval}
                     <option value="{$contract.id}">{$contract.name}</option>
-                    {/if}
                     {/volist}
                 </select>
             </div>
@@ -113,7 +111,7 @@
                     layer.close(index1);
                     if (result === 1) {
                         layer.msg('审批流程添加成功', function () {
-                            location.href='/approval/all';
+                            location.href='/approval/user/{$Think.session.admin.id}';
                         });
                     } else if (result === -1) {
                         layer.open({content:'添加失败！该合同已关联过其它审批流！', icon:2});

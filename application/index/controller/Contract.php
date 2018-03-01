@@ -8,6 +8,7 @@
 
 namespace app\index\controller;
 
+use app\index\lib\enum\ContractStatusEnum;
 use app\index\model\Category;
 use app\index\model\ContractExtra;
 use app\index\model\ContractFile;
@@ -23,7 +24,7 @@ use app\index\model\Approval as ApprovalModel;
 class Contract extends BaseController
 {
     protected $beforeActionList = [
-        'checkAuth' => ['only' => '']
+        'checkAuth' => ['only' => 'del']
     ];
 
     // add
@@ -282,12 +283,126 @@ class Contract extends BaseController
         }
         return $result;
     }
+    
+    // set executing
+    public function execute()
+    {
+        if (!$this->request->isAjax() && !$this->request->isPost()) {
+            return '非法操作';
+        }
+        $id = $this->request->param('id');
+        Db::startTrans();
+        try {
+            $result = static::setStatus($id, ContractStatusEnum::EXECUTING);
+            // 记录修改日志
+            Log::add([
+                'model' => 'ContractLog',
+                'user_id' => Session::get('admin.id'),
+                'contract_id' => $id,
+                'ip' => $this->request->ip(),
+                'location' => ip2address($this->request->ip()),
+                'note' => '设置执行了合同'
+            ]);
+            Db::commit();
+        } catch (Exception $e) {
+            Db::rollback();
+            return $e->getMessage();
+        }
+
+        return $result;
+    }
+
+    // set cancel
+    public function cancel()
+    {
+        if (!$this->request->isAjax() && !$this->request->isPost()) {
+            return '非法操作';
+        }
+        $id = $this->request->param('id');
+
+        Db::startTrans();
+        try {
+            $result = static::setStatus($id, ContractStatusEnum::CANCEL);
+            // 记录修改日志
+            Log::add([
+                'model' => 'ContractLog',
+                'user_id' => Session::get('admin.id'),
+                'contract_id' => $id,
+                'ip' => $this->request->ip(),
+                'location' => ip2address($this->request->ip()),
+                'note' => '中止了合同'
+            ]);
+            Db::commit();
+        } catch (Exception $e) {
+            Db::rollback();
+            return $e->getMessage();
+        }
+
+        return $result;
+    }
+    // set renew
+    public function renew()
+    {
+        if (!$this->request->isAjax() && !$this->request->isPost()) {
+            return '非法操作';
+        }
+        $id = $this->request->param('id');
+
+        Db::startTrans();
+        try {
+            $result = static::setStatus($id, ContractStatusEnum::RENEWED);
+            // 记录修改日志
+            Log::add([
+                'model' => 'ContractLog',
+                'user_id' => Session::get('admin.id'),
+                'contract_id' => $id,
+                'ip' => $this->request->ip(),
+                'location' => ip2address($this->request->ip()),
+                'note' => '设置续期了合同'
+            ]);
+            Db::commit();
+        } catch (Exception $e) {
+            Db::rollback();
+            return $e->getMessage();
+        }
+
+        return $result;
+    }
+    // set finish
+    public function finish()
+    {
+        if (!$this->request->isAjax() && !$this->request->isPost()) {
+            return '非法操作';
+        }
+        $id = $this->request->param('id');
+
+        Db::startTrans();
+        try {
+            $result = static::setStatus($id, ContractStatusEnum::FINISHED);
+            // 记录修改日志
+            Log::add([
+                'model' => 'ContractLog',
+                'user_id' => Session::get('admin.id'),
+                'contract_id' => $id,
+                'ip' => $this->request->ip(),
+                'location' => ip2address($this->request->ip()),
+                'note' => '设置完成了合同'
+            ]);
+            Db::commit();
+        } catch (Exception $e) {
+            Db::rollback();
+            return $e->getMessage();
+        }
+
+        return $result;
+    }
 
     // expiring
     public function expiring()
     {
         // 30天内到期的
         $contracts = ContractModel::with('category,type,customer,linkman,file,extra')
+            ->where('status', ContractStatusEnum::EXECUTING)
             ->where('due_date', '<', strtotime("+1 month"))
             ->order('id desc')
             ->select();
@@ -352,6 +467,10 @@ class Contract extends BaseController
         }
 
         $contracts = ContractModel::with('category,type,customer,linkman,file,extra');
+        // 如果存在status
+        if (isset($post['contract']['status']) && $post['contract']['status'] >= 0) {
+            $contracts = $contracts->where('status', $post['contract']['status']);
+        }
         // 如果存在type，则查type，没有则查category
         if (isset($post['type']['id']) && $post['type']['id']) {
             $contracts = $contracts->where('type_id', $post['type']['id']);

@@ -46,6 +46,11 @@ Route::rule('contract/del/:id', 'contract/del');
 Route::rule('contract/getContractSn/:category_id/:type_id', 'contract/getContractSn');
 Route::rule('contract/search', 'contract/search');
 Route::rule('contract/one/:id', 'contract/one');
+Route::rule('contract/execute/:id', 'contract/execute');
+Route::rule('contract/cancel/:id', 'contract/cancel');
+Route::rule('contract/renew/:id', 'contract/renew');
+Route::rule('contract/finish/:id', 'contract/finish');
+
 
 // contract extra
 Route::rule('contractExtra/del/:id', 'contractExtra/del');
@@ -57,6 +62,7 @@ Route::rule('upload', 'file/upload');
 Route::rule('approval/add', 'approval/add');
 Route::rule('approval/edit/:id', 'approval/edit');
 Route::rule('approval/del/:id', 'approval/del');
+Route::rule('approval/cancel/:id', 'approval/cancel');
 Route::rule('approval/all', 'approval/all');
 Route::rule('approval/user/:id', 'approval/ApprovalByUser'); // 我发起的审批
 Route::any('approval/:id', 'approval/ApprovalById', [], ['id'=>'\d+']);

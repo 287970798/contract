@@ -216,7 +216,7 @@
                     layer.close(index1);
                     if (result === 1) {
                         layer.msg('审批流程修改成功', function () {
-                            location.href = '/approval/all';
+                            location.href = '/approval/user/{$Think.session.admin.id}';
                         });
                     } else if (result === 'hasStarted') {
                         layer.open({

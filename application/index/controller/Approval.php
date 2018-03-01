@@ -16,6 +16,7 @@ use app\index\controller\Contract as ContractController;
 use app\index\model\User;
 use think\Db;
 use think\Exception;
+use think\Request;
 use think\Session;
 
 class Approval extends BaseController
@@ -30,7 +31,10 @@ class Approval extends BaseController
             $post = $this->request->post();
             $approvalModel = new ApprovalModel();
             // 验证关联的合同是否已被关联过
-            $one = $approvalModel->where('contract_id', 'eq', $post['contract_id'])->find();
+            $one = $approvalModel->where('contract_id', 'eq', $post['contract_id'])
+                ->where('status', 'neq', 3)
+                ->where('status', 'neq', 4)
+                ->find();
             if ($one) {
                 return -1;
             }
@@ -64,6 +68,14 @@ class Approval extends BaseController
                     $this->start($approvalModel->id);
                 } else {
                     ContractController::setStatus($approvalModel->contract_id, ContractStatusEnum::WAITING);
+                    // 记录合同变动日志
+                    Log::add([
+                        'model'=>'ContractLog',
+                        'user_id'=>Session::get('admin.id'),
+                        'contract_id'=>$approvalModel->contract_id,
+                        'ip' => $this->request->ip(),
+                        'location' => ip2address($this->request->ip()),
+                        'note'=>"新增了审批 {$approvalModel->name}，关联合同状态自动更新为待审。关联合同为"]);
                 }
                 return $result;
             } catch (Exception $e) {
@@ -73,7 +85,7 @@ class Approval extends BaseController
             return $result;
         }
         $users = User::all();
-        $contracts = Contract::with('approval')->field('id,name')->select();
+        $contracts = Contract::where('status', 0)->whereOr('status', 3)->field('id,name')->select();
         $this->assign([
             'title' => '新建审批',
             'contracts' => $contracts,
@@ -127,6 +139,8 @@ class Approval extends BaseController
                 // 开启审批
                 if ($post['start'] == 1) {
                     $this->start($id);
+                } else {
+                    ContractController::setStatus($approval->contract_id, ContractStatusEnum::WAITING);
                 }
                 return $result;
             } catch (Exception $e) {
@@ -191,10 +205,47 @@ class Approval extends BaseController
     {
         $approvals = ApprovalModel::with('contract')->order('id desc')->select();
         $this->assign([
-            'title' => '审批管理',
+            'title' => '全部审批管理',
             'approvals' => $approvals
         ]);
         return $this->fetch();
+    }
+    // cancel
+    public function cancel()
+    {
+        $id = $this->request->param('id');
+        if (!$this->request->isAjax() && !$this->request->isPost()) {
+            return '非法操作';
+        }
+        // 验证审批是否存在
+        $approval = ApprovalModel::get($id);
+        if (!$approval) {
+            return '审批不存在';
+        }
+        // 验证 是否在进行中
+        if ($approval->status != 1) {
+            return '只有进行中的审批才能撤销';
+        }
+        Db::startTrans();
+        try {
+            // 设置审批状态为 4
+            $result = $approval->where('id', $id)->setField('status', 4);
+            // 同步合同状为新录
+            ContractController::setStatus($approval->contract_id, ContractStatusEnum::UNUSED);
+            // 记录合同变动日志
+            Log::add([
+                'model' => 'ContractLog',
+                'user_id' => Session::get('admin.id'),
+                'contract_id' => $approval->contract_id,
+                'ip' => Request::instance()->ip(),
+                'location' => ip2address(Request::instance()->ip()),
+                'note' => "撤销了审批 {$approval->name}，关联合同状态自动同步为新录。关联合同为"]);
+            Db::commit();
+        } catch (Exception $e) {
+            Db::rollback();
+            return $e->getMessage();
+        }
+        return $result;
     }
     // del
     public function del()
@@ -211,6 +262,9 @@ class Approval extends BaseController
         if ($one->start == 1) {
             return 'hasStarted';
         }
+        if ($one->status <> 0){
+            return '只有待审状态的审批可删除';
+        }
 
         Db::startTrans();
         try{
@@ -223,6 +277,16 @@ class Approval extends BaseController
                     ApprovalNode::destroy($node->id);
                 }
             }
+            // 同步合同状态到新录
+            ContractController::setStatus($one->contract_id, ContractStatusEnum::UNUSED);
+            // 记录合同变动日志
+            Log::add([
+                'model'=>'ContractLog',
+                'user_id'=>Session::get('admin.id'),
+                'contract_id'=>$one->contract_id,
+                'ip' => $this->request->ip(),
+                'location' => ip2address($this->request->ip()),
+                'note'=>"删除了审批 {$one->name}，关联合同状态自动更新为新录。关联合同为"]);
             // 提交事务
             Db::commit();
             return $result;
@@ -306,6 +370,14 @@ class Approval extends BaseController
 
             // 设置合同状态为审批中
             ContractController::setStatus($approvalModel->contract_id, ContractStatusEnum::APPROVALING);
+            // 记录合同变动日志
+            Log::add([
+                'model'=>'ContractLog',
+                'user_id'=>Session::get('admin.id'),
+                'contract_id'=>$approvalModel->contract_id,
+                'ip' => $this->request->ip(),
+                'location' => ip2address($this->request->ip()),
+                'note'=>"开启了审批 {$approvalModel->name}，关联合同状态自动同步为审批中。关联合同为"]);
 
             Db::commit();
         } catch (Exception $e) {
@@ -340,10 +412,27 @@ class Approval extends BaseController
      */
     public static function stop($approvalId)
     {
-        $approval = ApprovalModel::get($approvalId);
-        $data = ['start'=>2];
-        ContractController::setStatus($approval->contract_id, ContractStatusEnum::WAITING);
-        return $approval->save($data);
+        Db::startTrans();
+        try{
+            $approval = ApprovalModel::get($approvalId);
+            $data = ['start'=>2];
+            // 同步合同
+            ContractController::setStatus($approval->contract_id, ContractStatusEnum::WAITING);
+            // 记录合同变动日志
+            Log::add([
+                'model'=>'ContractLog',
+                'user_id'=>Session::get('admin.id'),
+                'contract_id'=>$approval->contract_id,
+                'ip' => Request::instance()->ip(),
+                'location' => ip2address(Request::instance()->ip()),
+                'note'=>"锁定了审批 {$approval->name}，关联合同状态自动同步为待审。关联合同为"]);
+            $result = $approval->save($data);
+            Db::commit();
+        } catch (Exception $e) {
+            Db::rollback();
+            return $e->getMessage();
+        }
+        return $result;
     }
     // update total nodes
     public function setTotalNodes()

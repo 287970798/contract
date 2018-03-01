@@ -25,6 +25,10 @@
             <td>{$contract.id}</td>
         </tr>
         <tr>
+            <th>合同状态</th>
+            <td id="contract_status"></td>
+        </tr>
+        <tr>
             <th>合同类型</th>
             <td>{$contract.type.name}</td>
         </tr>
@@ -77,6 +81,19 @@
         var $ = layui.jquery;
         var table = layui.table;
         var util = layui.util;
+        // 合同状态
+        var contractStatus = {
+            0: "新录",
+            1: "待审",
+            2: "审批中",
+            3: "驳回",
+            4: "过审",
+            5: "执行",
+            6: "中止",
+            7: "已续期",
+            8: "完成"
+        };
+        $('#contract_status').html(contractStatus[{$contract.status}]);
 
         // 格式化日期
         var contractDate = util.toDateString({$contract.contract_date} * 1000, 'yyyy-MM-dd');

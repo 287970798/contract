@@ -104,7 +104,7 @@ class User extends BaseController
                 $user->address = $address;
                 // 记录session
                 Session::set('admin', $user);
-                Log::add(['model'=>'LoginLog', 'user_id'=>$user->id, 'ip'=>$ip, 'location'=>$address]);
+                Log::add(['model'=>'LoginLog', 'user_id'=>$user->id, 'ip'=>$ip, 'location'=>$address, 'note'=>'登录']);
                 return 1;
             } else {
                 return 2;
@@ -118,6 +118,9 @@ class User extends BaseController
     // logout
     public function logout()
     {
+        $ip = $this->request->ip();
+        $address = ip2address($ip);
+        Log::add(['model'=>'LoginLog', 'user_id'=>Session::get('admin.id'), 'ip'=>$ip, 'location'=>$address, 'note' => '退出']);
         Session::delete('admin');
         $this->redirect('/login', 302);
     }

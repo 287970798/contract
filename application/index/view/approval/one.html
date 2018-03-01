@@ -17,7 +17,10 @@
         </colgroup>
         <thead>
         <tr>
-            <th colspan="2" style="text-align: center">{$approval.name}</th>
+            <th colspan="2" style="text-align: center">
+                {$approval.name}
+                <span id="approval_status" class="layui-badge"></span>
+            </th>
         </tr>
         </thead>
         <tbody>
@@ -103,7 +106,14 @@
         var $ = layui.jquery;
         var table = layui.table;
         var util = layui.util;
-
+        var approvalStatus = {
+            0: "待审",
+            1: "进行",
+            2: "通过",
+            3: "驳回",
+            4: "已撤销"
+        };
+        $('#approval_status').html(approvalStatus[{$approval.status}])
         // 格式化日期
         var contractDate = util.toDateString({$approval.contract.contract_date} * 1000, 'yyyy-MM-dd');
         var dueDate = util.toDateString({$approval.contract.due_date} * 1000, 'yyyy-MM-dd');

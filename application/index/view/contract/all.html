@@ -55,6 +55,23 @@
                 </div>
                 <span id="more-filter">
                 <div class="layui-inline filter-item">
+                    <label class="layui-form-label">状态</label>
+                    <div class="layui-input-inline">
+                        <select name="contract[status]" lay-filter="status" lay-search>
+                            <option value></option>
+                            <option value="0">新录</option>
+                            <option value="1">待审</option>
+                            <option value="2">审批中</option>
+                            <option value="3">驳回</option>
+                            <option value="4">过审</option>
+                            <option value="5">执行中</option>
+                            <option value="6">中止</option>
+                            <option value="7">续期</option>
+                            <option value="8">完成</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-inline filter-item">
                     <label class="layui-form-label">类别</label>
                     <div class="layui-input-inline">
                         <select name="category[id]" lay-filter="category" lay-search>
@@ -118,9 +135,14 @@
 <table id="contract" lay-filter="contract"></table>
 <script type="text/html" id="operateBar">
     <a class="layui-btn layui-btn-xs" lay-event="detail">查看</a>
+    {// 新录与驳回的合同才能编辑}
+    {{# if(d.status == 3 || d.status == 0){ }}
     <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+    {{# } }}
+    {// 新录与驳回的合同，并且只有超级管理员才能删除}
+    {{# if((d.status == 3 || d.status == 0) && '{$Think.session.admin.level}' == 1 ) { }}
     <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
-
+    {{# } }}
     <!-- 这里同样支持 laytpl 语法，如： -->
     {{#  if(d.auth > 2){ }}
     <a class="layui-btn layui-btn-xs" lay-event="check">审核</a>
@@ -151,7 +173,22 @@
         <span class="icon icon-flow hasApproval" style="color:{{iconColor}}" data-name="{{d.approval.name}}" data-status='{{d.status}}'></span>
     {{# } }}
 </script>
-
+<script type="text/html" id="statusTpl">
+    {{#
+        var contractStatus = {
+            0: "新录",
+            1: "待审",
+            2: "审批中",
+            3: "驳回",
+            4: "过审",
+            5: "执行",
+            6: "中止",
+            7: "已续期",
+            8: "完成"
+        };
+    }}
+    {{ contractStatus[d.status] }}
+</script>
 {/block}
 
 {block name="js"}
@@ -277,6 +314,7 @@
         });
 
         // 渲染表格
+
         var tableIns = table.render({
             elem: '#contract'
             , height: 'full-270'
@@ -285,24 +323,27 @@
             , limit: 15
             , cols: [[ //表头
                 {checkbox: true},
-                {field: 'id', title: 'ID', width: 100, sort: true}
+                {title: '序号', width: 80, templet: '<div>{{d.LAY_INDEX}}</div>', sort: true}
                 , {field: 'contract_sn', title: '合同编号', sort: true}
-                , {field: 'name', title: '合同标题', sort: true}
-                , {field: 'type', title: '合同类型', templet: '<div>{{d.type.name}}</div>', sort: true}
-                , {field: 'manager', title: '负责人', sort: true}
+                , {field: 'name', title: '合同标题',/* templet: '#nameTpl',*/ sort: true}
+                , {field: 'type', title: '合同类型', width:120, templet: '<div>{{d.type.name}}</div>', sort: true}
+                , {field: 'manager', title: '负责人', width: 100, sort: true}
                 , {
                     field: 'due_date',
                     title: '签约日',
+                    width: 100,
                     templet: '<div>{{new Date(d.contract_date * 1000).toLocaleDateString()}}</div>',
                     sort: true
                 }
                 , {
                     field: 'due_date',
                     title: '到期日',
+                    width: 100,
                     templet: '<div>{{new Date(d.due_date * 1000).toLocaleDateString()}}</div>',
                     sort: true
                 }
-                , {title: '操作', fixed: 'right', width: 150, align: 'center', toolbar: '#operateBar'}
+                ,{field: 'status', title: '状态', width:80, templet: '#statusTpl', sort: true}
+                , {title: '操作', fixed: 'right', width: 150, align: 'left', toolbar: '#operateBar'}
             ]]
         });
         // 表格工具条操作
@@ -377,14 +418,140 @@
                 content += '<tr><th style="font-weight: bold;">创建时间</th><td>' + data.create_time + '</td></tr>' +
                     '</table>' +
                     '</div>';
+                // 根据合同状态设置按钮与回调
+                var detailBtn = '确定';
+                // 新录
+                if (data.status == 0) {
+                    detailBtn = ['确定', '立即执行'];
+                    var detailBtn2 = function (index1, layero) {
+                        layer.confirm('确定不需要审核，立即执行吗？', function (index2) {
+                            $.post({
+                                url: '/contract/execute/'+data.id,
+                                success: function (result) {
+                                    if (result === 1) {
+                                        layer.msg('执行成功');
+                                        layer.close(index2);
+                                        location.reload();
+                                    } else {
+                                        layer.msg('执行失败', {icon: 3})
+                                    }
+                                },
+                                fail: function (error) {
+                                    console.log(error)
+                                    layer.msg('执行失败', {icon: 3});
+                                }
+                            })
+                        });
+                        return false;
+                    }
+                }
+                // 中止
+                if (data.status == 6) {
+                    detailBtn = ['确定', '恢复执行'];
+                    var detailBtn2 = function (index1, layero) {
+                        layer.confirm('确定恢复执行该合同吗？', function (index2) {
+                            $.post({
+                                url: '/contract/execute/'+data.id,
+                                success: function (result) {
+                                    if (result === 1) {
+                                        layer.msg('恢复成功');
+                                        layer.close(index2);
+                                        location.reload();
+                                    } else {
+                                        layer.msg('恢复失败', {icon: 3})
+                                    }
+                                },
+                                fail: function (error) {
+                                    console.log(error)
+                                    layer.msg('恢复失败', {icon: 3});
+                                }
+                            })
+                        })
+                        return false;
+                    }
+                }
+                // 执行中
+                if (data.status == 5) {
+
+                    detailBtn = ['确定', '中止', '已续期','已完成'];
+
+                    var detailBtn2 = function (index1, layero) {
+                        layer.confirm('确定要中止合同吗？', function (index2) {
+                            $.post({
+                                url: '/contract/cancel/'+data.id,
+                                success: function (result) {
+                                    if (result === 1) {
+                                        layer.msg('中止操作成功',{time:3}, function () {
+                                            layer.close(index2);
+                                            location.reload();
+                                        });
+                                    } else {
+                                        layer.msg('中止操作失败', {icon: 3})
+                                    }
+                                },
+                                fail: function (error) {
+                                    console.log(error)
+                                    layer.msg('中止操作失败', {icon: 3});
+                                }
+                            })
+                        })
+                        return false;
+                    }
+                    var detailBtn3 = function (index1, layero) {
+                        layer.confirm('确定要将该合同设置为已续期吗？', function (index2) {
+                            $.post({
+                                url: '/contract/renew/'+data.id,
+                                success: function (result) {
+                                    if (result === 1) {
+                                        layer.msg('设置成功');
+                                        layer.close(index2);
+                                        location.reload();
+                                    } else {
+                                        layer.msg('设置失败', {icon: 3})
+                                    }
+                                },
+                                fail: function (error) {
+                                    console.log(error)
+                                    layer.msg('设置失败', {icon: 3});
+                                }
+                            })
+                        })
+                        return false;
+                    }
+                    var detailBtn4 = function (index1, layero) {
+                        layer.confirm('确定要将该合同设置为完成吗？', function (index2) {
+                            $.post({
+                                url: '/contract/finish/'+data.id,
+                                success: function (result) {
+                                    if (result === 1) {
+                                        layer.msg('设置成功');
+                                        layer.close(index2);
+                                        location.reload();
+                                    } else {
+                                        layer.msg('设置失败', {icon: 3})
+                                    }
+                                },
+                                fail: function (error) {
+                                    console.log(error)
+                                    layer.msg('设置失败', {icon: 3});
+                                }
+                            })
+                        })
+                        return false;
+                    }
+                }
+
                 var index = layer.open({
                     type: 1,
                     area: ['500px'],
                     maxmin: true,
-                    btn: '确定',
+                    btn: detailBtn,
                     btnAlign: 'c',
                     title: '合同详情',
-                    content: content //这里content是一个普通的String
+                    content: content, //这里content是一个普通的String
+                    btn2: detailBtn2,
+                    btn3: detailBtn3,
+                    btn4: detailBtn4
                 });
             }
         })

@@ -3,22 +3,41 @@
 <table id="approval" lay-filter="approval"></table>
 <script type="text/html" id="operateBar">
     <a class="layui-btn layui-btn-xs" lay-event="detail">查看</a>
-    <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
-    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
-
+    {{# if(d.status == 0){ }}
+        <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+    {{# } }}
+    {{# if(d.status == 3 || d.status == 0 || d.status == 4){ }}
+        <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+    {{# } }}
+    {{# if(d.status == 1 && (d.user_id == '{$Think.session.admin.id}' || '{$Think.session.admin.level}' == 1 )){ }}
+        <a class="layui-btn layui-btn-xs" lay-event="cancel">撤销</a>
+    {{# } }}
     <!-- 这里同样支持 laytpl 语法，如： -->
     {{#  if(d.auth > 2){ }}
     <a class="layui-btn layui-btn-xs" lay-event="check">审核</a>
     {{#  } }}
 </script>
 <script type="text/html" id="startBar">
+  {{# if(d.status == 0){ }}
     {{#  if(d.start == 1){ }}
     <a lay-event="start"><input type="checkbox" name="start" value="1" checked="checked" lay-skin="switch" lay-text="启用|锁定" id="start{{d.id}}"  lay-filter="start"></a>
     {{# }else{ }}
     <a lay-event="start"><input type="checkbox" name="start" value="2" lay-skin="switch" lay-text="启用|锁定" id="start{{d.id}}" lay-filter="start"></a>
     {{# } }}
+  {{# } }}
 </script>
-
+<script type="text/html" id="statusTpl">
+    {{#
+        var approvalStatus = {
+            0: "待审",
+            1: "进行",
+            2: "通过",
+            3: "驳回",
+            4: "已撤销"
+        };
+    }}
+    {{ approvalStatus[d.status] }}
+</script>
 {/block}
 
 {block name="js"}
@@ -38,8 +57,9 @@ layui.use(['form', 'table'], function () {
             {field: 'id', title: 'ID',width: 100, sort: true}
             ,{field: 'name', title: '审批名',sort: true}
             ,{field: 'contract', title: '关联合同', templet: '<div>{{d.contract.name}}</div>', sort: true}
-            ,{title: '状态', width:150, align:'center', toolbar: '#startBar'}
-            ,{title: '操作',fixed: 'right', width:150, align:'center', toolbar: '#operateBar'}
+            ,{filed: 'status', title: '状态', width: 80, templet: '#statusTpl', sort: true}
+            ,{title: '启用', width:150, align:'center', toolbar: '#startBar'}
+            ,{title: '操作',fixed: 'right', width:150, align:'left', toolbar: '#operateBar'}
         ]]
     });
 
@@ -81,6 +101,37 @@ layui.use(['form', 'table'], function () {
         // 编辑
         if (layEvent === 'edit') {
             location.href = '/approval/edit/' + data.id;
+        }
+        // cancel
+        if (layEvent === 'cancel') {
+            layer.confirm('确定要撤销吗', {icon: 3, title:'提示'}, function(index){
+                var cancelLoadingIndex = layer.load(1);
+                $.ajax({
+                    type: 'DELETE',
+                    url: '/approval/cancel/' + data.id,
+                    success: function (result) {
+                        layer.close(cancelLoadingIndex);
+                        if (result === 1) {
+                            layer.msg('操作成功', function () {
+                                location.reload();
+                            });
+                            console.log(result);
+                        }else if (result === 'hasStarted') {
+                            layer.open({title: '警告', content: '当前审批已开启，请先关闭，再进行该操作！', icon: 2})
+                        } else {
+                            layer.msg('操作失败');
+                            console.log(result);
+                        }
+                    },
+                    error: function (error) {
+                        layer.close(cancelLoadingIndex);
+                        layer.msg('操作失败');
+                        console.log(error)
+                    }
+                });
+
+                layer.close(index);
+            });
         }
         // 查看详情
         if (layEvent === 'detail') {

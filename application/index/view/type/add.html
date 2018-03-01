@@ -63,7 +63,11 @@
                 value: sn,
                 title: '请输入自定义合同类型编号',
             }, function(value, index, elem){
-                var newSn = util.digit(parseInt(value), 3) + '';
+                if (isNaN(value)) {
+                    layer.msg('只能输入数字');
+                    return false;
+                }
+                var newSn = util.digit(Math.abs(parseInt(value)), 3) + '';
                 $('input[name="sn"]').val(newSn)
                 layer.msg('合同类型编号号自定义完成');
                 layer.close(index);
