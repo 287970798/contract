@@ -4,7 +4,9 @@
 <script type="text/html" id="operateBar">
     <a class="layui-btn layui-btn-xs" lay-event="detail">查看</a>
     <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+    {{# if(d.username != 'admin' && d.username != '{$Think.session.admin.username}'){ }}
     <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+    {{# } }}
 
     <!-- 这里同样支持 laytpl 语法，如： -->
     {{#  if(d.auth > 2){ }}
@@ -36,13 +38,13 @@ layui.use(['form', 'table'], function () {
         ,limit: 15
         ,cols: [[ //表头
             {checkbox: true},
-            {field: 'id', title: 'ID', width: 100, sort: true}
+            {title: '序号', width: 100, templet: '<div>{{d.LAY_INDEX}}</div>', sort: true}
             ,{field: 'username', title: '用户名',sort: true}
             ,{field: 'name', title: '姓名',sort: true}
             ,{field: 'department', title: '部门',sort: true}
             ,{field: 'phone', title: '手机号',sort: true}
             ,{title: '状态', width:150, align:'center', toolbar: '#statusBar'}
-            ,{title: '操作',fixed: 'right', width:150, align:'center', toolbar: '#operateBar'}
+            ,{title: '操作',fixed: 'right', width:150, align:'left', toolbar: '#operateBar'}
         ]]
     });
     table.on('tool(user)', function(obj) { //注：tool是工具条事件名，test是table原始容器的属性 lay-filter="对应的值"
@@ -62,6 +64,16 @@ layui.use(['form', 'table'], function () {
                             obj.del();
                             layer.msg('操作成功');
                             console.log(result);
+                        } else if (result === 'hasContracts') {
+                            layer.open({content:'操作失败。系统中有该用户录入的合同，不可删除', icon:2});
+                        } else if (result === 'hasApprovals') {
+                            layer.open({content:'操作失败。系统中有该用户发起的审批，不可删除', icon:2});
+                        } else if (result === 'beNode') {
+                            layer.open({content:'操作失败。该用户在审批中有作为审批人存在，不可删除', icon:2});
+                        } else if (result === 'hasCustomers') {
+                            layer.open({content:'操作失败。系统中有该用户录入的客户，不可删除', icon:2});
+                        } else if (result === 'hasLinkmans') {
+                            layer.open({content:'操作失败。系统中有该用户录入的联系人，不可删除', icon:2});
                         } else {
                             layer.msg('操作失败');
                             console.log(result);

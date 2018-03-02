@@ -6,6 +6,11 @@ namespace app\index\controller;
 use app\index\model\User as UserModel;
 use think\Exception;
 use think\Session;
+use app\index\model\Contract as ContractModel;
+use app\index\model\Approval as ApprovalModel;
+use app\index\model\ApprovalNode;
+use app\index\model\Customer as CustomerModel;
+use app\index\model\Linkman as LinkmanModel;
 
 class User extends BaseController
 {
@@ -75,6 +80,33 @@ class User extends BaseController
         if (!is_numeric($id) && !is_int($id)) {
             return 'error';
         }
+        // 检测用户信息
+        // 是否有合同
+        $one = ContractModel::where('user_id', $id)->find();
+        if ($one) {
+            return 'hasContracts';
+        }
+        // 检测审批
+        $one = ApprovalModel::where('user_id', $id)->find();
+        if ($one) {
+            return 'hasApprovals';
+        }
+        // 检测是否是审批人
+        $one = ApprovalNode::where('user_id', $id)->find();
+        if ($one) {
+            return 'beNode';
+        }
+        // 检测客户
+        $one = CustomerModel::where('user_id', $id)->find();
+        if ($one) {
+            return 'hasCustomers';
+        }
+        // 检测联系人
+        $one = LinkmanModel::where('user_id', $id)->find();
+        if ($one) {
+            return 'hasLinkmans';
+        }
+
         $result = UserModel::destroy($id);
         return $result;
     }

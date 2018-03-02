@@ -51,6 +51,10 @@
                                 obj.del();
                                 layer.msg('操作成功');
                                 console.log(result);
+                            } else if (result === 'hasContracts') {
+                                layer.open({content:'操作失败。该客户名下有合同，不可删除', icon:2});
+                            } else if (result === 'hasLinkmans') {
+                                layer.open({content:'操作失败。该客户名下有联系人，不可删除', icon:2});
                             } else {
                                 layer.msg('操作失败');
                                 console.log(result);

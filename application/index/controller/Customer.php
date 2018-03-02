@@ -5,6 +5,8 @@ namespace app\index\controller;
 
 use app\index\model\Customer as CustomerModel;
 use think\Session;
+use app\index\model\Contract as ContractModel;
+use app\index\model\Linkman as LinkmanModel;
 
 class Customer extends BaseController
 {
@@ -61,6 +63,16 @@ class Customer extends BaseController
         $id = $this->request->param('id');
         if (!is_numeric($id) && !is_int($id)) {
             return 'error';
+        }
+        // 验证是否有关联的合同
+        $one = ContractModel::where('customer_id', $id)->find();
+        if ($one) {
+            return 'hasContracts';
+        }
+        // 验证联系人
+        $one = LinkmanModel::where('customer_id', $id)->find();
+        if ($one) {
+            return 'hasLinkmans';
         }
         $result = CustomerModel::destroy($id);
         return $result;
