@@ -458,17 +458,21 @@ class Contract extends BaseController
             return $contracts;
         }
         // contract sn
-        if (isset($post['contract']['contract_sn']) && $post['contract']['contract_sn']) {
-            $contracts = ContractModel::with('category,type,customer,linkman,file,extra')
-                ->where('contract_sn', $post['contract']['contract_sn'])
-                ->order('id desc')
-                ->select();
-            return $contracts;
-        }
+//        if (isset($post['contract']['contract_sn']) && $post['contract']['contract_sn']) {
+//            $contracts = ContractModel::with('category,type,customer,linkman,file,extra')
+//                ->where('contract_sn', $post['contract']['contract_sn'])
+//                ->order('id desc')
+//                ->select();
+//            return $contracts;
+//        }
 
         $contracts = ContractModel::with('category,type,customer,linkman,file,extra');
+        // 如果存在sn
+        if (isset($post['contract']['contract_sn']) && $post['contract']['contract_sn']) {
+            $contracts = $contracts->where('contract_sn', 'like', '%'.$post['contract']['contract_sn'].'%');
+        }
         // 如果存在status
-        if (isset($post['contract']['status']) && $post['contract']['status'] >= 0) {
+        if (isset($post['contract']['status']) && is_numeric($post['contract']['status']) && $post['contract']['status'] >= 0) {
             $contracts = $contracts->where('status', $post['contract']['status']);
         }
         // 如果存在type，则查type，没有则查category

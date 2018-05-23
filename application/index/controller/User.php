@@ -152,6 +152,7 @@ class User extends BaseController
     {
         $ip = $this->request->ip();
         $address = ip2address($ip);
+        if ($address === '未知') $address = Session::get('admin.address');
         Log::add(['model'=>'LoginLog', 'user_id'=>Session::get('admin.id'), 'ip'=>$ip, 'location'=>$address, 'note' => '退出']);
         Session::delete('admin');
         $this->redirect('/login', 302);

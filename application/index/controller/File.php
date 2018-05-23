@@ -45,4 +45,54 @@ class File extends BaseController
         ];
         return json($result);
     }
+
+    public function importExcel()
+    {
+        vendor("phpexcel.PHPExcel.IOFactory");
+        $fileName = ROOT_PATH . 'public/student.xlsx';
+
+        /**
+         *  加载所有sheet
+         */
+        // $obj = \PHPExcel_IOFactory::load($fileName);
+
+        /**
+         *  加载指定sheet
+         */
+        // 获取文件类型
+        $fileType = \PHPExcel_IOFactory::identify($fileName);
+        // 创建读取文件的操作对象
+        $reader = \PHPExcel_IOFactory::createReader($fileType);
+        // 加载指定sheet
+        $reader->setLoadSheetsOnly('Sheet1');
+        // 加载文件
+        $obj = $reader->load($fileName);
+
+        // 字段 以列号作为key
+        $fields = ['A' => 'name', 'B' => 'phone'];
+        // 数据存储临时数组
+        $data = $rowData = $cellData = [];
+        // 迭代sheet
+        foreach ($obj->getWorksheetIterator() as $sheet) {
+            // 迭代row
+            foreach ($sheet->getRowIterator() as $row) {
+                // 过滤第一行
+                if ($row->getRowIndex() < 2) continue;
+                // 迭代cell
+                foreach ($row->getCellIterator() as $key => $cell){
+                    // 获取当前行的cell的值
+                    $cellData[$fields[$key]] =$cell->getValue();
+                }
+                // 将当前行中存储有所有cell值的数组赋值给行数组
+                $rowData[] = $cellData;
+                // 清空当前行的cell数据存储数组，以用于存储下一行的数据
+                $cellData = [];
+            }
+            // 将当前sheet的所有行的数据，存储到data数组中
+            $data[] = $rowData;
+            // 清空当前sheet的行数据数组，以用于存储下个sheet的数据
+            $rowData = [];
+        }
+        print_r($data);
+    }
 }

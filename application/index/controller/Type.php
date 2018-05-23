@@ -25,14 +25,14 @@ class Type extends BaseController
         if ($this->request->isAjax() && $this->request->isPost()) {
             $post = $this->request->post();
             $type = new TypeModel();
-            // 检测合同类别是否已存在
+            // 检测合同类型名是否已存在
             $one = $type->where('name', 'eq', $post['name'])->find();
             if ($one) {
-                return -1; // 合同类别存在
+                return -1; // 合同类型存在
             }
-            $one = $type->where('sn', 'eq', $post['sn'])->find();
+            $one = $type->where('sn', 'eq', $post['sn'])->where('category_id', $post['category_id'])->find();
             if ($one) {
-                return -2; // 合同类别编号存在
+                return -2; // 合同类型编号存在
             }
             $result = $type->allowField(true)->save($post);
             return $result;
@@ -40,7 +40,7 @@ class Type extends BaseController
         // 获取所有分类
         $categories = Category::all();
         $this->assign([
-            'title' => '新增合同类别',
+            'title' => '新增合同类型',
             'categories' => $categories
         ]);
         return $this->fetch('add');
@@ -59,7 +59,7 @@ class Type extends BaseController
         // 获取所有合同分类
         $categories = Category::all();
         $this->assign([
-            'title' => '合同类别修改',
+            'title' => '合同类型修改',
             'type' => $type,
             'categories' => $categories
         ]);
@@ -71,7 +71,7 @@ class Type extends BaseController
         $types = TypeModel::with('category')->order('category_id desc, id desc')->select();
         $types = json_encode($types);
         $this->assign([
-            'title' => '合同类别管理',
+            'title' => '合同类型管理',
             'types' => $types
         ]);
         return $this->fetch();
@@ -108,7 +108,7 @@ class Type extends BaseController
         $result = TypeModel::destroy($id);
         return $result;
     }
-    // 获取当前分类下类别的当前最大编号
+    // 获取当前分类下类型的当前最大编号
     public function getNextSn()
     {
         // 必须为ajax请求
@@ -116,7 +116,7 @@ class Type extends BaseController
             return -1;
         }
         $category_id = $this->request->param('id');
-        // 获取当前最大合同类别编号，包含已删除的，不存在返回0
+        // 获取当前最大合同类型编号，包含已删除的，不存在返回0
         $maxSn = TypeModel::withTrashed()->where('category_id', 'eq', $category_id)->max('sn');
         // 自增1
         $maxSn ++;

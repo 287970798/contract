@@ -34,12 +34,18 @@
                 <div class="layui-inline filter-item">
                     <label class="layui-form-label">编号</label>
                     <div class="layui-input-inline">
+                        <!--
                         <select name="contract[contract_sn]" lay-filter="contract_sn" lay-search>
                             <option value></option>
                             {volist name="contracts" id="contract"}
                             <option value="{$contract.contract_sn}">{$contract.contract_sn}</option>
                             {/volist}
                         </select>
+                        -->
+                        <div class="layui-input-inline">
+                            <input type="text" name="contract[contract_sn]" placeholder="合同编号" autocomplete="off"
+                                   class="layui-input">
+                        </div>
                     </div>
                 </div>
                 <div class="layui-inline filter-item">
@@ -135,14 +141,10 @@
 <table id="contract" lay-filter="contract"></table>
 <script type="text/html" id="operateBar">
     <a class="layui-btn layui-btn-xs" lay-event="detail">查看</a>
-    {// 新录与驳回的合同才能编辑}
-    {{# if(d.status == 3 || d.status == 0){ }}
+    {// 新录与驳回的合同才能编辑if(d.status == 3 || d.status == 0) }
     <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
-    {{# } }}
-    {// 新录与驳回的合同，并且只有超级管理员才能删除}
-    {{# if((d.status == 3 || d.status == 0) && '{$Think.session.admin.level}' == 1 ) { }}
+    {// 新录与驳回的合同，并且只有超级管理员才能删除 if((d.status == 3 || d.status == 0) && '$Think.session.admin.level'==1) }
     <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
-    {{# } }}
     <!-- 这里同样支持 laytpl 语法，如： -->
     {{#  if(d.auth > 2){ }}
     <a class="layui-btn layui-btn-xs" lay-event="check">审核</a>
@@ -267,6 +269,7 @@
 
         // filter submit
         form.on('submit(search)', function (data) {
+            console.log(data.field);
             // 判断筛选条件是否为空
             var selectHasVal = false;
             $('.filter-item select').each(function () {
@@ -293,6 +296,7 @@
                 url: '/contract/search',
                 data: data.field,
                 success: function (result) {
+                    console.log(result)
                     layer.close(fileterIndex);
                     layer.msg('筛选完成');
                     tableIns.reload({

@@ -37,6 +37,9 @@ function ip2address($ip) {
     $res = httpCurl('http://ip.taobao.com/service/getIpInfo.php?ip='.$ip);
     $ipObj = json_decode($res);
     $address = '';
+    if (!is_object($ipObj)) {
+        return '未知';
+    }
     if ($ipObj->code === 0) {
         $address = $ipObj->data->country . $ipObj->data->region . $ipObj->data->city . $ipObj->data->isp;
     }

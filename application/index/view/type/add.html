@@ -3,9 +3,9 @@
 <div class="layui-container">
     <form class="layui-form layui-form-pane" action="">
         <div class="layui-form-item">
-            <label class="layui-form-label">类别名称</label>
+            <label class="layui-form-label">类型名称</label>
             <div class="layui-input-block">
-                <input type="text" name="name" required lay-verify="required" placeholder="请填写合同类别名称" autocomplete="off"
+                <input type="text" name="name" required lay-verify="required" placeholder="请填写合同类型名称" autocomplete="off"
                        class="layui-input">
             </div>
         </div>
@@ -21,9 +21,9 @@
             </div>
         </div>
         <div class="layui-form-item" id="sn">
-            <label class="layui-form-label">类别编号</label>
+            <label class="layui-form-label">类型编号</label>
             <div class="layui-input-block">
-                <input type="text" name="sn" required lay-verify="required" placeholder="类别编号" autocomplete="off"
+                <input type="text" name="sn" required lay-verify="required" placeholder="类型编号" autocomplete="off"
                        class="layui-input" disabled>
             </div>
         </div>
@@ -109,13 +109,13 @@
                     console.log(result);
                     layer.close(index1);
                     if (result === 1) {
-                        layer.msg('合同类别添加成功', function () {
+                        layer.msg('合同类型添加成功', function () {
                             location.href='/type/all';
                         });
                     } else if (result === -1) {
-                        layer.open({content:'添加失败！合同类别已存在！', icon:2});
+                        layer.open({content:'添加失败！合同类型名称已存在！', icon:2});
                     } else if (result === -2) {
-                        layer.open({content:'添加失败！合同类别编号已存在！', icon:2});
+                        layer.open({content:'添加失败！合同类型编号已存在！', icon:2});
                     }
                 },
                 error: function (error) {

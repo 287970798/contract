@@ -82,3 +82,6 @@ Route::rule('log/:type$', 'log/show');
 // test 测试curl发送邮件
 Route::rule('test/mail', 'test/mail');
 Route::rule('test/cache', 'test/cache');
+
+//file
+Route::rule('file/import-excel', 'file/importExcel');
